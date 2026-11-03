@@ -2,7 +2,7 @@
 
 geo is a client-only, audio-played early-CGI scene composer. Users build sparse, clean 3D compositions from geometric primitives, stylized materials, simple worlds, and autonomous motion. Loudness, transients, and stereo space perform the scene; the scene itself—not an audio analysis display—is the artwork.
 
-Read `docs/roadmap.md` before changing scope. Implement only the current milestone unless the user requests otherwise. The current milestone is the fixed visual study: prove the starter composition and WebGL capture before building the complete editor.
+Read `docs/roadmap.md` before changing scope. Implement only the current milestone unless the user requests otherwise. Milestone 1, the fixed visual study and WebGL capture spike, is implemented and verified. Milestone 2, the blank scene editor, is next and has not begun; do not add editor scope until requested.
 
 ## Non-Negotiable Rules
 

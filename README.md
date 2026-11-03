@@ -1,10 +1,10 @@
 # geo
 
-geo is a planned client-only, audio-played early-CGI scene composer. It will combine sparse geometric scenes, clean chrome and plastic materials, simple digital worlds, and autonomous motion with loudness, transient, and stereo reactivity.
+geo is a client-only, audio-played early-CGI scene composer. It combines sparse geometric forms, clean chrome and plastic materials, simple digital worlds, and autonomous motion with loudness, transient, and stereo reactivity.
 
-The artwork is the scene—not a spectrum analyzer. Compositions should remain intentional during silence, while music adds breathing, springy impacts, and movement through stereo space.
+The artwork is the scene—not a spectrum analyzer. The composition remains intentional during silence, while music adds breathing, springy impacts, and movement through stereo space.
 
-> **Current status:** project scaffold only. The Three.js scene, audio engine, editor, and exporter are not implemented yet. See [`docs/roadmap.md`](docs/roadmap.md) for the approved plan and current milestone.
+> **Current status:** Milestone 1, the fixed visual study and five-second capture spike, is implemented and verified in desktop Chromium. The scene editor, optional starter-scene workflow, and full-track export are not implemented yet. See [`docs/roadmap.md`](docs/roadmap.md) for the approved plan.
 
 ## Requirements
 
@@ -34,49 +34,76 @@ Open the local URL printed by Vite.
 | `pnpm test` | Run the Vitest suite once |
 | `pnpm format` | Format source and Vite/ESLint configuration with Prettier |
 
-The test command currently allows an empty suite during scaffolding. Add focused tests as pure logic is introduced.
+## What works
 
-## Confirmed product direction
+### Fixed visual study
 
-- Clean, pristine early-CGI visuals rather than heavy glitch or persistent degradation.
-- A blank initial canvas with one optional polished starter scene.
-- Geometric primitives, stylized reflective materials, gradients, fog, simple floors, and selective bloom.
-- Loudness (`level`, `intensity`), transient (`impact`), stereo position (`balance`), and stereo spread (`width`) as the initial signals.
-- No visible waveform, spectrum, frequency axes, or analyzer graphics.
-- Session-local scene configuration with no persistence, accounts, backend, or audio upload.
-- Desktop Chromium-first development and full-track real-time MP4 export as a planned milestone.
+The canvas holds one authored composition: a chrome torus above a softly reflective floor, a smaller emissive satellite, a pale cyan-to-lavender backdrop, fog, contact shadow, and controlled cyan and lavender lighting. The chrome and floor stay sharp while a separate bloom layer gives the satellite a restrained glow.
 
-## Architecture direction
+The torus rotates, floats, and turns slowly on its own. The satellite follows an orbit and the camera drifts subtly. These baseline movements continue while audio is paused or silent, so the scene never depends on sound to remain a composition.
 
-React will own low-frequency editor state and accessible controls. Direct Three.js classes will own the scene and render loop. Web Audio playback and recording routing can be adapted from [typo](https://github.com/angelortjimz/typo), with a separate analysis-only stereo branch and pure feature-extraction modules.
+### Local audio and performance
+
+Audio is selected with the file input or dropped anywhere on the workspace. It is decoded locally and never uploaded. The transport supports play, pause/resume, seeking, volume, replacement, and track-end restart.
+
+The audio engine reads stereo time-domain samples through an analysis-only branch and extracts:
+
+- `level` and `intensity` for loudness-driven response
+- `impact` for transients
+- `balance` and `width` for stereo position and spread
+
+The study maps those signals to bounded breathing, spring compression and flare, sustained rotation, satellite drift, and orbital expansion. Mono files are duplicated into both analysis channels, producing centered balance and zero width. Silence produces neutral values while autonomous motion continues. Listener volume does not feed back into the analysis.
+
+### Five-second capture
+
+**Capture 5 s** records the current composition and original stereo audio to a downloadable MP4. The capture restarts playback from the current playhead so visual and audio recording begin together. It uses the canvas through an even-sized 2D bridge, preserving aspect ratio and the post-processed WebGL output.
+
+The file is accepted only after an MP4 `ftyp` header check. Recording, download, stream, and canvas-capture resources are released after completion, failure, or unmount. The spike was verified with H.264 video and AAC stereo audio in production Chromium.
+
+### Lifecycle
+
+The renderer, audio graph, animation frames, event subscriptions, recording streams, GPU geometries, materials, textures, and render targets are cleaned up on disposal. A development Strict Mode smoke test confirmed one active render loop, one `AudioContext`, and one audio source after mount.
+
+## Current limitations
+
+- The scene is fixed. Object selection, scene controls, and the blank/starter-scene choice belong to the next milestone.
+- Capture is a five-second technical spike, not the full-track exporter. It captures in real time from the current playhead and always stops after five seconds.
+- MP4 recording depends on desktop Chromium's `MediaRecorder`, WebGL canvas capture, and H.264/AAC codec support. Other browsers and very slow software-only GPU rendering are not verified capture targets and may drop video frames.
+- Scene state is session-local. There is no autosave, project file, account, backend, or persistence.
+- The study is desktop-first. Phone layouts are not a validation target for this milestone.
+
+## Architecture
+
+React owns low-frequency workspace state and accessible controls. Direct Three.js owns the scene, post-processing, and its single animation loop; no Three.js object or per-frame transform enters React state. Pure modules implement audio features, envelopes, springs, and behavior clamping.
 
 ```text
 Local audio
-    → AudioEngine
-    → Level / intensity / impact / balance / width
-    → Object behaviors and scene motion
-    → Three.js renderer and selective post-processing
-    → WebGL canvas
-    → Planned real-time MP4 export
+    → local validation and decode
+    → AudioEngine ── audible analyser → volume → speakers → original-audio tap
+                   └ analysis-only splitter → left/right analysers
+    → level / intensity / impact / balance / width
+    → envelopes, spring, and bounded scene behaviors
+    → Three.js scene and selective satellite bloom
+    → WebGL canvas → optional five-second capture bridge
 ```
 
-## Planned project structure
+The fixed scene is represented by a versioned `SceneConfig`. The document and feature signals are structured for later editor and exporter milestones, but no persistence or full export is present.
+
+## Project structure
 
 ```text
-src/audio/       Playback, stereo analysis, feature extraction
-src/scene/       Versioned configuration, defaults, seeded generation
-src/motion/      Envelopes, springs, object and scene behaviors
-src/render/      Three.js renderer, materials, worlds, post-processing
-src/export/      Capture bridge, capability checks, MP4 exporter
-src/components/  React workspace and inspector controls
+src/audio/       Playback, stereo analysis, feature extraction, audio UI hook
+src/scene/       Versioned fixed-study configuration and procedural textures
+src/motion/      Envelopes, spring response, and bounded behavior helpers
+src/render/      Three.js renderer, environment, reflection, selective bloom
+src/export/      Five-second capture orchestration, canvas bridge, MP4 checks
+src/components/  Canvas, upload, transport, capture controls, workspace UI
 docs/            Product roadmap and verification notes
 ```
 
-These directories and responsibilities will be introduced with their corresponding milestones rather than created as empty abstractions.
-
 ## Privacy
 
-The intended application is entirely local: no backend, analytics, account system, streaming integration, or audio upload. The current scaffold makes no audio requests and implements no persistence.
+The application is entirely local: there is no backend, analytics, account system, streaming integration, or remote audio upload. Selected audio stays in the browser and scene state is not persisted.
 
 ## Contributing
 

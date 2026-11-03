@@ -335,22 +335,22 @@ Selected modules should be ported into this project; no shared package or monore
 
 ## 10. Milestones
 
-The project scaffold and documentation are initialized. **Milestone 1 is current.** All behavior checkboxes below remain unchecked until implemented and verified.
+The project scaffold and documentation are initialized. **Milestone 1 is implemented and verified.** Milestone 2 is next and has not begun. All behavior checkboxes below remain unchecked until implemented and verified.
 
 ### Milestone 1 — Fixed Visual Study and Capture Spike
 
 **Goal:** Prove the clean CGI identity and audio-performance concept with the starter composition before building the editor.
 
-- [ ] Initialize a direct Three.js renderer with proper lifecycle cleanup.
-- [ ] Build the fixed chrome torus, emissive satellite, floor, environment, fog, camera, and lights.
-- [ ] Add clean antialiasing and selective bloom.
-- [ ] Add autonomous rotation, satellite orbit, and camera drift.
-- [ ] Port the local audio engine and transport foundation from typo.
-- [ ] Extract level, intensity, impact, balance, and width from local playback.
-- [ ] Implement breathing, spring impact, stereo drift, and width expansion.
-- [ ] Verify neutral behavior with mono and silent audio.
-- [ ] Validate WebGL canvas capture with post-processing and original audio.
-- [ ] Tune the fixed scene without audio until it is visually polished.
+- [x] Initialize a direct Three.js renderer with proper lifecycle cleanup.
+- [x] Build the fixed chrome torus, emissive satellite, floor, environment, fog, camera, and lights.
+- [x] Add clean antialiasing and selective bloom.
+- [x] Add autonomous rotation, satellite orbit, and camera drift.
+- [x] Port the local audio engine and transport foundation from typo.
+- [x] Extract level, intensity, impact, balance, and width from local playback.
+- [x] Implement breathing, spring impact, stereo drift, and width expansion.
+- [x] Verify neutral behavior with mono and silent audio.
+- [x] Validate WebGL canvas capture with post-processing and original audio.
+- [x] Tune the fixed scene without audio until it is visually polished.
 
 **Exit criteria**
 
