@@ -1,0 +1,179 @@
+:root {
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', monospace;
+  color: #171b20;
+  background: #f4f4f0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --paper: #f4f4f0;
+  --ink: #171b20;
+  --muted: #6f757b;
+  --line: #d9dcd9;
+  --panel-width: clamp(280px, 24vw, 340px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-areas:
+    'canvas panel'
+    'transport transport';
+  grid-template-columns: minmax(0, 1fr) var(--panel-width);
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.canvas-stage {
+  display: grid;
+  grid-area: canvas;
+  min-width: 0;
+  min-height: 0;
+  place-items: end start;
+  overflow: hidden;
+  padding: clamp(24px, 5vw, 72px);
+  background:
+    radial-gradient(circle at 66% 32%, rgb(255 255 255 / 80%), transparent 34%),
+    linear-gradient(145deg, #d9edef 0%, #e4e0ef 48%, #c4d3d8 100%);
+}
+
+.scene-placeholder {
+  max-width: 360px;
+}
+
+.scene-placeholder__eyebrow,
+.milestone__status {
+  display: block;
+  margin-bottom: 10px;
+  color: #52636b;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.scene-placeholder p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.composition-panel {
+  grid-area: panel;
+  min-width: 0;
+  min-height: 0;
+  padding: 34px 30px;
+  overflow-y: auto;
+  border-left: 1px solid var(--line);
+}
+
+.app-header {
+  margin-bottom: 64px;
+}
+
+.app-name {
+  margin: 0;
+  font-size: clamp(44px, 4vw, 58px);
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  line-height: 1;
+}
+
+.app-tagline {
+  max-width: 230px;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+.milestone h2 {
+  margin: 0 0 18px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.milestone p,
+.milestone__steps {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.8;
+}
+
+.milestone__steps {
+  margin: 24px 0 0;
+  padding-left: 18px;
+}
+
+.milestone__steps li + li {
+  margin-top: 10px;
+}
+
+.transport {
+  display: flex;
+  grid-area: transport;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  padding: 18px 32px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 780px) {
+  html,
+  body,
+  #root {
+    height: auto;
+    min-height: 100%;
+  }
+
+  body {
+    overflow: auto;
+  }
+
+  .app-shell {
+    grid-template-areas:
+      'canvas'
+      'panel'
+      'transport';
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(340px, 55dvh) auto auto;
+    min-height: 100dvh;
+    height: auto;
+    overflow: visible;
+  }
+
+  .composition-panel {
+    padding: 30px 24px;
+    overflow: visible;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .app-header {
+    margin-bottom: 40px;
+  }
+
+  .transport {
+    padding: 18px 24px;
+  }
+}
