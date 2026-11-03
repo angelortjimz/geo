@@ -1,14 +1,32 @@
 import { CanvasTexture, Color, Matrix4, SRGBColorSpace, Texture, Vector2 } from 'three'
-import type { SceneConfig } from '../scene/study'
+import type {
+  BackdropConfig,
+  CheckerFloorConfig,
+  GradientBackdropConfig,
+  ReflectiveFloorConfig,
+} from '../scene/sceneConfig'
 
 export interface SoftFloorShader {
   name: string
   uniforms: {
-    color: { value: Color | null }
+    color: { value: Color }
+    horizonColor: { value: Color }
     tDiffuse: { value: Texture | null }
     textureMatrix: { value: Matrix4 | null }
     texelSize: { value: Vector2 }
-    fogColor: { value: Color }
+    fadeStart: { value: number }
+    fadeEnd: { value: number }
+  }
+  vertexShader: string
+  fragmentShader: string
+}
+
+export interface CheckerFloorShader {
+  name: string
+  uniforms: {
+    lightColor: { value: Color }
+    darkColor: { value: Color }
+    horizonColor: { value: Color }
     fadeStart: { value: number }
     fadeEnd: { value: number }
   }
@@ -23,17 +41,22 @@ function createCanvas(width: number, height: number): HTMLCanvasElement {
   return canvas
 }
 
-export function createBackdropTexture(config: SceneConfig): CanvasTexture {
+/** The visible background color the floor must fade into at its horizon. */
+export function getBackdropHorizonColor(backdrop: BackdropConfig): string {
+  return backdrop.type === 'solid' ? backdrop.color : backdrop.horizon
+}
+
+export function createBackdropTexture(backdrop: GradientBackdropConfig): CanvasTexture {
   const canvas = createCanvas(32, 512)
   const context = canvas.getContext('2d')
   if (!context) {
-    throw new Error('A 2D canvas is required to create the study backdrop.')
+    throw new Error('A 2D canvas is required to create the scene backdrop.')
   }
 
   const gradient = context.createLinearGradient(0, 0, 0, canvas.height)
-  gradient.addColorStop(0, config.world.backgroundTop)
-  gradient.addColorStop(0.58, config.world.backgroundHorizon)
-  gradient.addColorStop(1, config.world.backgroundBottom)
+  gradient.addColorStop(0, backdrop.top)
+  gradient.addColorStop(0.58, backdrop.horizon)
+  gradient.addColorStop(1, backdrop.bottom)
   context.fillStyle = gradient
   context.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -101,17 +124,20 @@ export function createContactShadowTexture(): CanvasTexture {
   return texture
 }
 
-export function createSoftFloorShader(config: SceneConfig): SoftFloorShader {
+export function createSoftFloorShader(
+  floor: ReflectiveFloorConfig,
+  horizonColor: string,
+): SoftFloorShader {
   return {
     name: 'GeoSoftFloorShader',
     uniforms: {
-      color: { value: new Color(config.world.floorColor) },
+      color: { value: new Color(floor.color) },
+      horizonColor: { value: new Color(horizonColor) },
       tDiffuse: { value: null },
       textureMatrix: { value: null },
       texelSize: { value: new Vector2(1 / 512, 1 / 512) },
-      fogColor: { value: new Color(config.world.fogColor) },
-      fadeStart: { value: config.world.floorFadeStart },
-      fadeEnd: { value: config.world.floorFadeEnd },
+      fadeStart: { value: floor.fadeStart },
+      fadeEnd: { value: floor.fadeEnd },
     },
     vertexShader: /* glsl */ `
       uniform mat4 textureMatrix;
@@ -130,7 +156,7 @@ export function createSoftFloorShader(config: SceneConfig): SoftFloorShader {
     `,
     fragmentShader: /* glsl */ `
       uniform vec3 color;
-      uniform vec3 fogColor;
+      uniform vec3 horizonColor;
       uniform sampler2D tDiffuse;
       uniform vec2 texelSize;
       uniform float fadeStart;
@@ -151,7 +177,56 @@ export function createSoftFloorShader(config: SceneConfig): SoftFloorShader {
 
         vec3 floorImage = mix(reflected, color, 0.66);
         float distanceFade = smoothstep(fadeStart, fadeEnd, length(vWorldPosition.xz));
-        gl_FragColor = vec4(mix(floorImage, fogColor, distanceFade), 1.0);
+        gl_FragColor = vec4(mix(floorImage, horizonColor, distanceFade), 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }
+    `,
+  }
+}
+
+export function createCheckerFloorShader(
+  floor: CheckerFloorConfig,
+  horizonColor: string,
+): CheckerFloorShader {
+  return {
+    name: 'GeoCheckerFloorShader',
+    uniforms: {
+      lightColor: { value: new Color(floor.lightColor) },
+      darkColor: { value: new Color(floor.darkColor) },
+      horizonColor: { value: new Color(horizonColor) },
+      fadeStart: { value: floor.fadeStart },
+      fadeEnd: { value: floor.fadeEnd },
+    },
+    vertexShader: /* glsl */ `
+      varying vec3 vWorldPosition;
+
+      #include <common>
+      #include <logdepthbuf_pars_vertex>
+
+      void main() {
+        vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        #include <logdepthbuf_vertex>
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 lightColor;
+      uniform vec3 darkColor;
+      uniform vec3 horizonColor;
+      uniform float fadeStart;
+      uniform float fadeEnd;
+      varying vec3 vWorldPosition;
+
+      #include <logdepthbuf_pars_fragment>
+
+      void main() {
+        #include <logdepthbuf_fragment>
+        vec2 cell = floor(vWorldPosition.xz);
+        float checker = mod(cell.x + cell.y, 2.0);
+        vec3 surface = mix(darkColor, lightColor, checker);
+        float distanceFade = smoothstep(fadeStart, fadeEnd, length(vWorldPosition.xz));
+        gl_FragColor = vec4(mix(surface, horizonColor, distanceFade), 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }

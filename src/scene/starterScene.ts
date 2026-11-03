@@ -116,7 +116,7 @@ export function createStarterScene(): SceneConfig {
           floatSpeed: 0.38,
           orbitRadius: 2.7,
           orbitSpeed: 0.19,
-          phase: 0.42,
+          phase: 0.067,
         },
         reaction: {
           breathe: 0,
@@ -129,14 +129,13 @@ export function createStarterScene(): SceneConfig {
     ],
     world: {
       backdrop: {
-        type: 'gradient',
-        top: '#b9dce3',
-        horizon: '#ddd7e9',
-        bottom: '#94a9b5',
+        type: 'solid',
+        color: '#c9d6dc',
       },
       floor: {
-        type: 'reflective',
-        color: '#9daebf',
+        type: 'checker',
+        lightColor: '#dfe4e2',
+        darkColor: '#8f9c9f',
         size: 80,
         fadeStart: 7,
         fadeEnd: 29,

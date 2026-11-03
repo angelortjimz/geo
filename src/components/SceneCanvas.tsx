@@ -3,7 +3,10 @@ import type { AudioEngine } from '../audio/AudioEngine'
 import { drawCaptureFrame, getCaptureDimensions } from '../export/captureCanvas'
 import type { SceneCaptureHandle } from '../export/captureTypes'
 import { SceneRenderer } from '../render/SceneRenderer'
-import { FIXED_STUDY_SCENE } from '../scene/study'
+import { getBackdropHorizonColor } from '../render/sceneTextures'
+import { createStarterScene } from '../scene/starterScene'
+
+const INITIAL_SCENE = createStarterScene()
 
 interface SceneCanvasProps {
   engine: AudioEngine
@@ -37,7 +40,7 @@ export const SceneCanvas = forwardRef<SceneCaptureHandle, SceneCanvasProps>(func
           return null
         }
 
-        drawCaptureFrame(source, target, FIXED_STUDY_SCENE.world.fogColor)
+        drawCaptureFrame(source, target, getBackdropHorizonColor(INITIAL_SCENE.world.backdrop))
         exportTargetRef.current = target
         renderer.setCaptureTarget(target)
         return target
@@ -62,7 +65,7 @@ export const SceneCanvas = forwardRef<SceneCaptureHandle, SceneCanvasProps>(func
     let observer: ResizeObserver | null = null
 
     try {
-      renderer = new SceneRenderer(canvas, engine, FIXED_STUDY_SCENE)
+      renderer = new SceneRenderer(canvas, engine, INITIAL_SCENE)
       rendererRef.current = renderer
       setError(null)
 

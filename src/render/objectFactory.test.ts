@@ -1,0 +1,71 @@
+import { describe, expect, it } from 'vitest'
+import type { FormConfig, MaterialConfig } from '../scene/sceneConfig'
+import {
+  createObjectMaterial,
+  createPrimitiveGeometry,
+  getGeometryKey,
+  getMaterialKey,
+} from './objectFactory'
+
+const SMOOTH_TORUS: FormConfig = { primitive: 'torus', detail: 1, flatShading: false }
+const CHROME: MaterialConfig = { kind: 'chrome', color: '#e4edf2', gloss: 0.84, emission: 0 }
+
+describe('object factory', () => {
+  it('increases tessellation with the detail control', () => {
+    const lowTorus = createPrimitiveGeometry(SMOOTH_TORUS)
+    const highTorus = createPrimitiveGeometry({ ...SMOOTH_TORUS, detail: 4 })
+    expect(highTorus.getAttribute('position').count).toBeGreaterThan(
+      lowTorus.getAttribute('position').count,
+    )
+    lowTorus.dispose()
+    highTorus.dispose()
+
+    const lowIcosahedron = createPrimitiveGeometry({
+      primitive: 'icosahedron',
+      detail: 1,
+      flatShading: true,
+    })
+    const highIcosahedron = createPrimitiveGeometry({
+      primitive: 'icosahedron',
+      detail: 4,
+      flatShading: true,
+    })
+    expect(highIcosahedron.getAttribute('position').count).toBeGreaterThan(
+      lowIcosahedron.getAttribute('position').count,
+    )
+    lowIcosahedron.dispose()
+    highIcosahedron.dispose()
+  })
+
+  it('applies material presets and flat shading', () => {
+    const chrome = createObjectMaterial(SMOOTH_TORUS, CHROME)
+    expect(chrome.metalness).toBe(1)
+    expect(chrome.roughness).toBeCloseTo(0.16, 5)
+    expect(chrome.flatShading).toBe(false)
+    chrome.dispose()
+
+    const flatEmissive = createObjectMaterial(
+      { ...SMOOTH_TORUS, flatShading: true },
+      { kind: 'emissive', color: '#b7f5ff', gloss: 0.5, emission: 0.55 },
+    )
+    expect(flatEmissive.flatShading).toBe(true)
+    expect(flatEmissive.emissiveIntensity).toBe(0)
+    expect(flatEmissive.metalness).toBeLessThan(1)
+    flatEmissive.dispose()
+  })
+
+  it('rebuilds geometry only for primitive or detail changes', () => {
+    const base = getGeometryKey(SMOOTH_TORUS)
+    expect(getGeometryKey({ ...SMOOTH_TORUS, flatShading: true })).toBe(base)
+    expect(getGeometryKey({ ...SMOOTH_TORUS, detail: 2 })).not.toBe(base)
+    expect(getGeometryKey({ ...SMOOTH_TORUS, primitive: 'box' })).not.toBe(base)
+  })
+
+  it('rebuilds material only for visible material changes', () => {
+    const base = getMaterialKey(SMOOTH_TORUS, CHROME)
+    expect(getMaterialKey(SMOOTH_TORUS, { ...CHROME, emission: 1 })).toBe(base)
+    expect(getMaterialKey(SMOOTH_TORUS, { ...CHROME, color: '#000000' })).not.toBe(base)
+    expect(getMaterialKey(SMOOTH_TORUS, { ...CHROME, kind: 'plastic' })).not.toBe(base)
+    expect(getMaterialKey({ ...SMOOTH_TORUS, flatShading: true }, CHROME)).not.toBe(base)
+  })
+})
