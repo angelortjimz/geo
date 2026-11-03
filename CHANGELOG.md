@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Five-second MP4 capture spike with original stereo audio, current-playhead restart, post-processed frame bridging, even capture dimensions, aspect-ratio containment, MP4 header validation, manual download, and capture lifecycle cleanup.
 - Focused Vitest coverage for audio features, playback helpers, file validation, motion behaviors, springs, capture sizing, and MP4 helpers.
 - Responsive renderer sizing with DPR cap, controlled scene clock, stale-analysis reset, and explicit GPU, audio-node, stream, observer, timer, and animation-frame teardown.
+- Versioned multi-object scene document with stable object identities, shared numeric limits and normalization, immutable add/duplicate/remove/patch operations, blank and starter scene factories, and pure spherical camera navigation math, covered by focused tests.
 
 ### Changed
 
