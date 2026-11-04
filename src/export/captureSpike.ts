@@ -163,6 +163,9 @@ export class CaptureSpike {
         throw new Error('The WebGL canvas is not ready for capture.')
       }
       session.canvasHandle = handle
+      // Capture always starts from the composed resting state, never from
+      // whatever clock, orbit, or envelope the editor preview happened to have.
+      handle.resetMotion()
 
       const videoStream = canvas.captureStream(30)
       const videoTrack = videoStream.getVideoTracks()[0]

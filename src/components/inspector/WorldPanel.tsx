@@ -10,6 +10,12 @@ import type {
   SceneConfig,
 } from '../../scene/sceneConfig'
 import {
+  DEFAULT_CHECKER_FLOOR,
+  DEFAULT_GRADIENT_BACKDROP,
+  DEFAULT_LINEAR_FOG,
+  DEFAULT_REFLECTIVE_FLOOR,
+} from '../../scene/sceneDefaults'
+import {
   AMBIENT_INTENSITY_RANGE,
   CAMERA_DRIFT_RANGE,
   CAMERA_DISTANCE_RANGE,
@@ -24,6 +30,7 @@ import {
   LIGHT_INTENSITY_RANGE,
 } from '../../scene/sceneLimits'
 import { ColorField, SelectField, SliderField, Vector3Field } from './fields'
+import { formatDegrees, formatUnits } from './formatters'
 
 const BACKDROP_OPTIONS: readonly { value: BackdropKind; label: string }[] = [
   { value: 'gradient', label: 'Gradient' },
@@ -41,6 +48,10 @@ const FOG_OPTIONS: readonly { value: FogKind; label: string }[] = [
   { value: 'linear', label: 'Linear' },
 ]
 
+const AZIMUTH_RANGE = { minimum: -180, maximum: 180 } as const
+
+type ActiveFloorConfig = Exclude<FloorConfig, { readonly type: 'none' }>
+
 function createBackdrop(kind: BackdropKind, current: BackdropConfig): BackdropConfig {
   if (kind === 'solid') {
     return {
@@ -49,12 +60,7 @@ function createBackdrop(kind: BackdropKind, current: BackdropConfig): BackdropCo
     }
   }
 
-  return {
-    type: 'gradient',
-    top: '#e6ecec',
-    horizon: '#f2f2ee',
-    bottom: '#c7cfd0',
-  }
+  return DEFAULT_GRADIENT_BACKDROP
 }
 
 interface FloorDistances {
@@ -65,7 +71,11 @@ interface FloorDistances {
 
 function getFloorDistance(floor: FloorConfig): FloorDistances {
   return floor.type === 'none'
-    ? { size: 80, fadeStart: 6, fadeEnd: 28 }
+    ? {
+        size: DEFAULT_REFLECTIVE_FLOOR.size,
+        fadeStart: DEFAULT_REFLECTIVE_FLOOR.fadeStart,
+        fadeEnd: DEFAULT_REFLECTIVE_FLOOR.fadeEnd,
+      }
     : { size: floor.size, fadeStart: floor.fadeStart, fadeEnd: floor.fadeEnd }
 }
 
@@ -76,18 +86,9 @@ function createFloor(kind: FloorKind, current: FloorConfig): FloorConfig {
     case 'none':
       return { type: 'none' }
     case 'reflective':
-      return {
-        type: 'reflective',
-        color: '#c2cbcd',
-        ...distances,
-      }
+      return { ...DEFAULT_REFLECTIVE_FLOOR, ...distances }
     case 'checker':
-      return {
-        type: 'checker',
-        lightColor: '#dfe4e2',
-        darkColor: '#8f9c9f',
-        ...distances,
-      }
+      return { ...DEFAULT_CHECKER_FLOOR, ...distances }
   }
 }
 
@@ -96,9 +97,42 @@ function createFog(kind: FogKind, current: FogConfig): FogConfig {
     return { type: 'none' }
   }
 
-  return current.type === 'linear'
-    ? current
-    : { type: 'linear', color: '#dfe4e4', near: 12, far: 34 }
+  return current.type === 'linear' ? current : DEFAULT_LINEAR_FOG
+}
+
+interface FloorDistanceFieldsProps {
+  floor: ActiveFloorConfig
+  onChange: (floor: FloorConfig) => void
+}
+
+function FloorDistanceFields({ floor, onChange }: FloorDistanceFieldsProps) {
+  return (
+    <>
+      <SliderField
+        label="Size"
+        value={floor.size}
+        range={FLOOR_SIZE_RANGE}
+        step={1}
+        onChange={(size) => onChange({ ...floor, size })}
+      />
+      <SliderField
+        label="Fade start"
+        value={floor.fadeStart}
+        range={FLOOR_FADE_START_RANGE}
+        step={0.5}
+        format={formatUnits}
+        onChange={(fadeStart) => onChange({ ...floor, fadeStart })}
+      />
+      <SliderField
+        label="Fade end"
+        value={floor.fadeEnd}
+        range={FLOOR_FADE_END_RANGE}
+        step={0.5}
+        format={formatUnits}
+        onChange={(fadeEnd) => onChange({ ...floor, fadeEnd })}
+      />
+    </>
+  )
 }
 
 interface WorldPanelProps {
@@ -183,32 +217,7 @@ export function WorldPanel({
                 value={floor.color}
                 onChange={(color) => onSetFloor({ ...floor, color })}
               />
-              <SliderField
-                label="Size"
-                value={floor.size}
-                minimum={FLOOR_SIZE_RANGE.minimum}
-                maximum={FLOOR_SIZE_RANGE.maximum}
-                step={1}
-                onChange={(size) => onSetFloor({ ...floor, size })}
-              />
-              <SliderField
-                label="Fade start"
-                value={floor.fadeStart}
-                minimum={FLOOR_FADE_START_RANGE.minimum}
-                maximum={FLOOR_FADE_START_RANGE.maximum}
-                step={0.5}
-                format={(value) => `${value.toFixed(1)} units`}
-                onChange={(fadeStart) => onSetFloor({ ...floor, fadeStart })}
-              />
-              <SliderField
-                label="Fade end"
-                value={floor.fadeEnd}
-                minimum={FLOOR_FADE_END_RANGE.minimum}
-                maximum={FLOOR_FADE_END_RANGE.maximum}
-                step={0.5}
-                format={(value) => `${value.toFixed(1)} units`}
-                onChange={(fadeEnd) => onSetFloor({ ...floor, fadeEnd })}
-              />
+              <FloorDistanceFields floor={floor} onChange={onSetFloor} />
             </>
           )}
 
@@ -224,32 +233,7 @@ export function WorldPanel({
                 value={floor.darkColor}
                 onChange={(darkColor) => onSetFloor({ ...floor, darkColor })}
               />
-              <SliderField
-                label="Size"
-                value={floor.size}
-                minimum={FLOOR_SIZE_RANGE.minimum}
-                maximum={FLOOR_SIZE_RANGE.maximum}
-                step={1}
-                onChange={(size) => onSetFloor({ ...floor, size })}
-              />
-              <SliderField
-                label="Fade start"
-                value={floor.fadeStart}
-                minimum={FLOOR_FADE_START_RANGE.minimum}
-                maximum={FLOOR_FADE_START_RANGE.maximum}
-                step={0.5}
-                format={(value) => `${value.toFixed(1)} units`}
-                onChange={(fadeStart) => onSetFloor({ ...floor, fadeStart })}
-              />
-              <SliderField
-                label="Fade end"
-                value={floor.fadeEnd}
-                minimum={FLOOR_FADE_END_RANGE.minimum}
-                maximum={FLOOR_FADE_END_RANGE.maximum}
-                step={0.5}
-                format={(value) => `${value.toFixed(1)} units`}
-                onChange={(fadeEnd) => onSetFloor({ ...floor, fadeEnd })}
-              />
+              <FloorDistanceFields floor={floor} onChange={onSetFloor} />
             </>
           )}
         </section>
@@ -272,19 +256,17 @@ export function WorldPanel({
               <SliderField
                 label="Near"
                 value={fog.near}
-                minimum={FOG_NEAR_RANGE.minimum}
-                maximum={FOG_NEAR_RANGE.maximum}
+                range={FOG_NEAR_RANGE}
                 step={0.5}
-                format={(value) => `${value.toFixed(1)} units`}
+                format={formatUnits}
                 onChange={(near) => onSetFog({ ...fog, near })}
               />
               <SliderField
                 label="Far"
                 value={fog.far}
-                minimum={FOG_FAR_RANGE.minimum}
-                maximum={FOG_FAR_RANGE.maximum}
+                range={FOG_FAR_RANGE}
                 step={0.5}
-                format={(value) => `${value.toFixed(1)} units`}
+                format={formatUnits}
                 onChange={(far) => onSetFog({ ...fog, far })}
               />
             </>
@@ -303,8 +285,7 @@ export function WorldPanel({
           <SliderField
             label="Ambient intensity"
             value={lighting.ambientIntensity}
-            minimum={AMBIENT_INTENSITY_RANGE.minimum}
-            maximum={AMBIENT_INTENSITY_RANGE.maximum}
+            range={AMBIENT_INTENSITY_RANGE}
             step={0.01}
             onChange={(ambientIntensity) => onPatchLighting({ ambientIntensity })}
           />
@@ -316,8 +297,7 @@ export function WorldPanel({
           <SliderField
             label="Key intensity"
             value={lighting.keyIntensity}
-            minimum={LIGHT_INTENSITY_RANGE.minimum}
-            maximum={LIGHT_INTENSITY_RANGE.maximum}
+            range={LIGHT_INTENSITY_RANGE}
             step={0.01}
             onChange={(keyIntensity) => onPatchLighting({ keyIntensity })}
           />
@@ -329,8 +309,7 @@ export function WorldPanel({
           <SliderField
             label="Fill intensity"
             value={lighting.fillIntensity}
-            minimum={LIGHT_INTENSITY_RANGE.minimum}
-            maximum={LIGHT_INTENSITY_RANGE.maximum}
+            range={LIGHT_INTENSITY_RANGE}
             step={0.01}
             onChange={(fillIntensity) => onPatchLighting({ fillIntensity })}
           />
@@ -352,43 +331,38 @@ export function WorldPanel({
           <SliderField
             label="Distance"
             value={camera.distance}
-            minimum={CAMERA_DISTANCE_RANGE.minimum}
-            maximum={CAMERA_DISTANCE_RANGE.maximum}
+            range={CAMERA_DISTANCE_RANGE}
             step={0.05}
             onChange={(distance) => onPatchCamera({ distance })}
           />
           <SliderField
             label="Azimuth"
             value={camera.azimuth}
-            minimum={-180}
-            maximum={180}
+            range={AZIMUTH_RANGE}
             step={1}
-            format={(value) => `${value.toFixed(0)}°`}
+            format={formatDegrees}
             onChange={(azimuth) => onPatchCamera({ azimuth })}
           />
           <SliderField
             label="Elevation"
             value={camera.elevation}
-            minimum={CAMERA_ELEVATION_RANGE.minimum}
-            maximum={CAMERA_ELEVATION_RANGE.maximum}
+            range={CAMERA_ELEVATION_RANGE}
             step={1}
-            format={(value) => `${value.toFixed(0)}°`}
+            format={formatDegrees}
             onChange={(elevation) => onPatchCamera({ elevation })}
           />
           <SliderField
             label="Field of view"
             value={camera.fov}
-            minimum={CAMERA_FOV_RANGE.minimum}
-            maximum={CAMERA_FOV_RANGE.maximum}
+            range={CAMERA_FOV_RANGE}
             step={1}
-            format={(value) => `${value.toFixed(0)}°`}
+            format={formatDegrees}
             onChange={(fov) => onPatchCamera({ fov })}
           />
           <SliderField
             label="Drift"
             value={camera.drift}
-            minimum={CAMERA_DRIFT_RANGE.minimum}
-            maximum={CAMERA_DRIFT_RANGE.maximum}
+            range={CAMERA_DRIFT_RANGE}
             step={0.01}
             onChange={(drift) => onPatchCamera({ drift })}
           />

@@ -38,3 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated the README, roadmap, milestone plan, and project conventions to describe the implemented editor, its verification, and the remaining limitations.
 - Replaced the scaffold canvas placeholder and capability footer with the fixed study, local-audio transport, capture control, status feedback, and compact signal explanation.
 - Updated the README to describe implemented behavior, verified capture output, architecture, privacy, and current limitations.
+- Centralized scene defaults in `sceneDefaults.ts` so normalization, the blank and starter scenes, and the World inspector share one source of truth.
+- Inspector sliders now consume shared `NumericRange` limits, with common display formatters and a single floor-distance field group.
+
+### Fixed
+
+- Capture now resets procedural motion and analysis envelopes before recording instead of inheriting the editor preview's clock, orbit, spring, and stereo state.

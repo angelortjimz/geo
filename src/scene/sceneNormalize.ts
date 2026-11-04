@@ -25,6 +25,17 @@ import type {
 } from './sceneConfig'
 import { PRIMITIVE_LABELS, SCENE_VERSION } from './sceneConfig'
 import {
+  DEFAULT_BLOOM,
+  DEFAULT_CAMERA,
+  DEFAULT_CHECKER_FLOOR,
+  DEFAULT_FINISH,
+  DEFAULT_GRADIENT_BACKDROP,
+  DEFAULT_LIGHTING,
+  DEFAULT_LINEAR_FOG,
+  DEFAULT_REFLECTIVE_FLOOR,
+  DEFAULT_SOLID_COLOR,
+} from './sceneDefaults'
+import {
   AMBIENT_INTENSITY_RANGE,
   BLOOM_RADIUS_RANGE,
   BLOOM_STRENGTH_RANGE,
@@ -76,26 +87,6 @@ const MAX_ID_LENGTH = 60
 const MAX_NAME_LENGTH = 40
 const DEFAULT_OBJECT_SEQUENCE_LIMIT = 9_999
 
-const DEFAULT_SOLID_COLOR = '#cfd6d6'
-const DEFAULT_GRADIENT: GradientBackdropConfig = {
-  type: 'gradient',
-  top: '#e6ecec',
-  horizon: '#f2f2ee',
-  bottom: '#c7cfd0',
-}
-const DEFAULT_REFLECTIVE_FLOOR: ReflectiveFloorConfig = {
-  type: 'reflective',
-  color: '#c2cbcd',
-  size: 80,
-  fadeStart: 6,
-  fadeEnd: 28,
-}
-const DEFAULT_CHECKER_LIGHT = '#dfe4e2'
-const DEFAULT_CHECKER_DARK = '#b9c1c1'
-const DEFAULT_FOG_COLOR = '#dfe4e4'
-const DEFAULT_AMBIENT_COLOR = '#e2e6ea'
-const DEFAULT_KEY_COLOR = '#eef7ff'
-const DEFAULT_FILL_COLOR = '#e6e2ff'
 const DEFAULT_MATERIAL_COLOR = '#e4edf2'
 const DEFAULT_EMISSIVE_COLOR = '#b7f5ff'
 
@@ -211,9 +202,9 @@ export function normalizeGradientBackdrop(
 ): GradientBackdropConfig {
   return {
     type: 'gradient',
-    top: sanitizeColor(backdrop.top, DEFAULT_GRADIENT.top),
-    horizon: sanitizeColor(backdrop.horizon, DEFAULT_GRADIENT.horizon),
-    bottom: sanitizeColor(backdrop.bottom, DEFAULT_GRADIENT.bottom),
+    top: sanitizeColor(backdrop.top, DEFAULT_GRADIENT_BACKDROP.top),
+    horizon: sanitizeColor(backdrop.horizon, DEFAULT_GRADIENT_BACKDROP.horizon),
+    bottom: sanitizeColor(backdrop.bottom, DEFAULT_GRADIENT_BACKDROP.bottom),
   }
 }
 
@@ -252,8 +243,8 @@ export function normalizeCheckerFloor(floor: CheckerFloorConfig): CheckerFloorCo
 
   return {
     type: 'checker',
-    lightColor: sanitizeColor(floor.lightColor, DEFAULT_CHECKER_LIGHT),
-    darkColor: sanitizeColor(floor.darkColor, DEFAULT_CHECKER_DARK),
+    lightColor: sanitizeColor(floor.lightColor, DEFAULT_CHECKER_FLOOR.lightColor),
+    darkColor: sanitizeColor(floor.darkColor, DEFAULT_CHECKER_FLOOR.darkColor),
     size: clampNumber(floor.size, FLOOR_SIZE_RANGE, DEFAULT_REFLECTIVE_FLOOR.size),
     fadeStart: fade.start,
     fadeEnd: fade.end,
@@ -276,7 +267,7 @@ export function normalizeLinearFog(fog: LinearFogConfig): LinearFogConfig {
 
   return {
     type: 'linear',
-    color: sanitizeColor(fog.color, DEFAULT_FOG_COLOR),
+    color: sanitizeColor(fog.color, DEFAULT_LINEAR_FOG.color),
     near: range.start,
     far: range.end,
   }
@@ -288,12 +279,24 @@ export function normalizeFog(fog: FogConfig): FogConfig {
 
 export function normalizeLighting(lighting: LightingConfig): LightingConfig {
   return {
-    ambientColor: sanitizeColor(lighting.ambientColor, DEFAULT_AMBIENT_COLOR),
-    ambientIntensity: clampNumber(lighting.ambientIntensity, AMBIENT_INTENSITY_RANGE, 0.6),
-    keyColor: sanitizeColor(lighting.keyColor, DEFAULT_KEY_COLOR),
-    keyIntensity: clampNumber(lighting.keyIntensity, LIGHT_INTENSITY_RANGE, 2.2),
-    fillColor: sanitizeColor(lighting.fillColor, DEFAULT_FILL_COLOR),
-    fillIntensity: clampNumber(lighting.fillIntensity, LIGHT_INTENSITY_RANGE, 1.5),
+    ambientColor: sanitizeColor(lighting.ambientColor, DEFAULT_LIGHTING.ambientColor),
+    ambientIntensity: clampNumber(
+      lighting.ambientIntensity,
+      AMBIENT_INTENSITY_RANGE,
+      DEFAULT_LIGHTING.ambientIntensity,
+    ),
+    keyColor: sanitizeColor(lighting.keyColor, DEFAULT_LIGHTING.keyColor),
+    keyIntensity: clampNumber(
+      lighting.keyIntensity,
+      LIGHT_INTENSITY_RANGE,
+      DEFAULT_LIGHTING.keyIntensity,
+    ),
+    fillColor: sanitizeColor(lighting.fillColor, DEFAULT_LIGHTING.fillColor),
+    fillIntensity: clampNumber(
+      lighting.fillIntensity,
+      LIGHT_INTENSITY_RANGE,
+      DEFAULT_LIGHTING.fillIntensity,
+    ),
   }
 }
 
@@ -308,27 +311,27 @@ export function normalizeWorld(world: WorldConfig): WorldConfig {
 
 export function normalizeCamera(camera: CameraConfig): CameraConfig {
   return {
-    target: clampVector3(camera.target, CAMERA_TARGET_RANGE, DEFAULT_POSITION),
-    distance: clampNumber(camera.distance, CAMERA_DISTANCE_RANGE, 11.6),
-    azimuth: normalizeDegrees(camera.azimuth, 0),
-    elevation: clampNumber(camera.elevation, CAMERA_ELEVATION_RANGE, 18),
-    fov: clampNumber(camera.fov, CAMERA_FOV_RANGE, 38),
-    drift: clampNumber(camera.drift, CAMERA_DRIFT_RANGE, 0.13),
+    target: clampVector3(camera.target, CAMERA_TARGET_RANGE, DEFAULT_CAMERA.target),
+    distance: clampNumber(camera.distance, CAMERA_DISTANCE_RANGE, DEFAULT_CAMERA.distance),
+    azimuth: normalizeDegrees(camera.azimuth, DEFAULT_CAMERA.azimuth),
+    elevation: clampNumber(camera.elevation, CAMERA_ELEVATION_RANGE, DEFAULT_CAMERA.elevation),
+    fov: clampNumber(camera.fov, CAMERA_FOV_RANGE, DEFAULT_CAMERA.fov),
+    drift: clampNumber(camera.drift, CAMERA_DRIFT_RANGE, DEFAULT_CAMERA.drift),
   }
 }
 
 export function normalizeBloom(bloom: BloomConfig): BloomConfig {
   return {
     enabled: Boolean(bloom.enabled),
-    threshold: clampNumber(bloom.threshold, BLOOM_THRESHOLD_RANGE, 0.85),
-    strength: clampNumber(bloom.strength, BLOOM_STRENGTH_RANGE, 0.26),
-    radius: clampNumber(bloom.radius, BLOOM_RADIUS_RANGE, 0.18),
+    threshold: clampNumber(bloom.threshold, BLOOM_THRESHOLD_RANGE, DEFAULT_BLOOM.threshold),
+    strength: clampNumber(bloom.strength, BLOOM_STRENGTH_RANGE, DEFAULT_BLOOM.strength),
+    radius: clampNumber(bloom.radius, BLOOM_RADIUS_RANGE, DEFAULT_BLOOM.radius),
   }
 }
 
 export function normalizeFinish(finish: FinishConfig): FinishConfig {
   return {
-    exposure: clampNumber(finish.exposure, EXPOSURE_RANGE, 1.08),
+    exposure: clampNumber(finish.exposure, EXPOSURE_RANGE, DEFAULT_FINISH.exposure),
     bloom: normalizeBloom(finish.bloom),
   }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from 'react'
 import type { Vector3Tuple } from '../../scene/sceneConfig'
+import type { NumericRange } from '../../scene/sceneLimits'
 
 function decimalsForStep(step: number): number {
   if (step >= 1) {
@@ -21,22 +22,14 @@ function defaultFormat(value: number, step: number): string {
 interface SliderFieldProps {
   label: string
   value: number
-  minimum: number
-  maximum: number
+  range: NumericRange
   step: number
   onChange: (value: number) => void
   format?: (value: number) => string
 }
 
-export function SliderField({
-  label,
-  value,
-  minimum,
-  maximum,
-  step,
-  onChange,
-  format,
-}: SliderFieldProps) {
+export function SliderField({ label, value, range, step, onChange, format }: SliderFieldProps) {
+  const { minimum, maximum } = range
   const id = useId()
   const display = (format ?? ((current: number) => defaultFormat(current, step)))(value)
 

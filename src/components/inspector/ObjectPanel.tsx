@@ -20,6 +20,7 @@ import {
   STRIKE_RANGE,
 } from '../../scene/sceneLimits'
 import { ColorField, SelectField, SliderField, ToggleField, Vector3Field } from './fields'
+import { formatPercent, formatRadiansPerSecond } from './formatters'
 
 const PRIMITIVE_OPTIONS: readonly { value: PrimitiveKind; label: string }[] = [
   { value: 'torus', label: 'Torus' },
@@ -32,10 +33,6 @@ const MATERIAL_OPTIONS: readonly { value: MaterialKind; label: string }[] = [
   { value: 'plastic', label: 'Glossy plastic' },
   { value: 'emissive', label: 'Emissive' },
 ]
-
-function percent(value: number): string {
-  return `${(value * 100).toFixed(1)}%`
-}
 
 interface ObjectPanelProps {
   object: SceneObjectConfig | null
@@ -76,10 +73,8 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
             <SliderField
               label="Detail"
               value={object.form.detail}
-              minimum={DETAIL_RANGE.minimum}
-              maximum={DETAIL_RANGE.maximum}
+              range={DETAIL_RANGE}
               step={1}
-              format={(value) => value.toFixed(0)}
               onChange={(detail) => onPatch({ form: { detail } })}
             />
           )}
@@ -143,8 +138,7 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
           <SliderField
             label="Gloss"
             value={object.material.gloss}
-            minimum={GLOSS_RANGE.minimum}
-            maximum={GLOSS_RANGE.maximum}
+            range={GLOSS_RANGE}
             step={0.01}
             onChange={(gloss) => onPatch({ material: { gloss } })}
           />
@@ -152,8 +146,7 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
             <SliderField
               label="Emission"
               value={object.material.emission}
-              minimum={EMISSION_RANGE.minimum}
-              maximum={EMISSION_RANGE.maximum}
+              range={EMISSION_RANGE}
               step={0.01}
               onChange={(emission) => onPatch({ material: { emission } })}
             />
@@ -165,25 +158,22 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
           <SliderField
             label="Spin"
             value={object.motion.spin}
-            minimum={SPIN_RANGE.minimum}
-            maximum={SPIN_RANGE.maximum}
+            range={SPIN_RANGE}
             step={0.01}
-            format={(value) => `${value.toFixed(2)} rad/s`}
+            format={formatRadiansPerSecond}
             onChange={(spin) => onPatch({ motion: { spin } })}
           />
           <SliderField
             label="Float"
             value={object.motion.float}
-            minimum={FLOAT_RANGE.minimum}
-            maximum={FLOAT_RANGE.maximum}
+            range={FLOAT_RANGE}
             step={0.01}
             onChange={(float) => onPatch({ motion: { float } })}
           />
           <SliderField
             label="Float speed"
             value={object.motion.floatSpeed}
-            minimum={FLOAT_SPEED_RANGE.minimum}
-            maximum={FLOAT_SPEED_RANGE.maximum}
+            range={FLOAT_SPEED_RANGE}
             step={0.01}
             format={(value) => `${value.toFixed(2)} cycles`}
             onChange={(floatSpeed) => onPatch({ motion: { floatSpeed } })}
@@ -191,8 +181,7 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
           <SliderField
             label="Orbit radius"
             value={object.motion.orbitRadius}
-            minimum={ORBIT_RADIUS_RANGE.minimum}
-            maximum={ORBIT_RADIUS_RANGE.maximum}
+            range={ORBIT_RADIUS_RANGE}
             step={0.05}
             onChange={(orbitRadius) => onPatch({ motion: { orbitRadius } })}
           />
@@ -201,17 +190,15 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
               <SliderField
                 label="Orbit speed"
                 value={object.motion.orbitSpeed}
-                minimum={ORBIT_SPEED_RANGE.minimum}
-                maximum={ORBIT_SPEED_RANGE.maximum}
+                range={ORBIT_SPEED_RANGE}
                 step={0.01}
-                format={(value) => `${value.toFixed(2)} rad/s`}
+                format={formatRadiansPerSecond}
                 onChange={(orbitSpeed) => onPatch({ motion: { orbitSpeed } })}
               />
               <SliderField
                 label="Phase"
                 value={object.motion.phase}
-                minimum={PHASE_RANGE.minimum}
-                maximum={PHASE_RANGE.maximum}
+                range={PHASE_RANGE}
                 step={0.01}
                 onChange={(phase) => onPatch({ motion: { phase } })}
               />
@@ -229,43 +216,38 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
           <SliderField
             label="Breathe"
             value={object.reaction.breathe}
-            minimum={BREATHE_RANGE.minimum}
-            maximum={BREATHE_RANGE.maximum}
+            range={BREATHE_RANGE}
             step={0.005}
-            format={percent}
+            format={formatPercent}
             onChange={(breathe) => onPatch({ reaction: { breathe } })}
           />
           <SliderField
             label="Strike"
             value={object.reaction.strike}
-            minimum={STRIKE_RANGE.minimum}
-            maximum={STRIKE_RANGE.maximum}
+            range={STRIKE_RANGE}
             step={0.005}
-            format={percent}
+            format={formatPercent}
             onChange={(strike) => onPatch({ reaction: { strike } })}
           />
           <SliderField
             label="Flare"
             value={object.reaction.flare}
-            minimum={FLARE_RANGE.minimum}
-            maximum={FLARE_RANGE.maximum}
+            range={FLARE_RANGE}
             step={0.01}
-            format={percent}
+            format={formatPercent}
             onChange={(flare) => onPatch({ reaction: { flare } })}
           />
           <SliderField
             label="Balance drift"
             value={object.reaction.drift}
-            minimum={DRIFT_RANGE.minimum}
-            maximum={DRIFT_RANGE.maximum}
+            range={DRIFT_RANGE}
             step={0.01}
             onChange={(drift) => onPatch({ reaction: { drift } })}
           />
           <SliderField
             label="Width expand"
             value={object.reaction.expand}
-            minimum={EXPAND_RANGE.minimum}
-            maximum={EXPAND_RANGE.maximum}
+            range={EXPAND_RANGE}
             step={0.01}
             onChange={(expand) => onPatch({ reaction: { expand } })}
           />

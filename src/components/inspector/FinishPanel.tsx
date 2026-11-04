@@ -25,8 +25,7 @@ export function FinishPanel({ finish, locked, onPatch }: FinishPanelProps) {
           <SliderField
             label="Tone mapping exposure"
             value={finish.exposure}
-            minimum={EXPOSURE_RANGE.minimum}
-            maximum={EXPOSURE_RANGE.maximum}
+            range={EXPOSURE_RANGE}
             step={0.01}
             onChange={(exposure) => onPatch({ exposure })}
           />
@@ -45,24 +44,21 @@ export function FinishPanel({ finish, locked, onPatch }: FinishPanelProps) {
               <SliderField
                 label="Threshold"
                 value={finish.bloom.threshold}
-                minimum={BLOOM_THRESHOLD_RANGE.minimum}
-                maximum={BLOOM_THRESHOLD_RANGE.maximum}
+                range={BLOOM_THRESHOLD_RANGE}
                 step={0.01}
                 onChange={(threshold) => onPatch({ bloom: { threshold } })}
               />
               <SliderField
                 label="Strength"
                 value={finish.bloom.strength}
-                minimum={BLOOM_STRENGTH_RANGE.minimum}
-                maximum={BLOOM_STRENGTH_RANGE.maximum}
+                range={BLOOM_STRENGTH_RANGE}
                 step={0.01}
                 onChange={(strength) => onPatch({ bloom: { strength } })}
               />
               <SliderField
                 label="Radius"
                 value={finish.bloom.radius}
-                minimum={BLOOM_RADIUS_RANGE.minimum}
-                maximum={BLOOM_RADIUS_RANGE.maximum}
+                range={BLOOM_RADIUS_RANGE}
                 step={0.01}
                 onChange={(radius) => onPatch({ bloom: { radius } })}
               />

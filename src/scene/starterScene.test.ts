@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getCameraPosition } from './camera'
 import { normalizeSceneConfig } from './sceneNormalize'
+import { DEFAULT_CAMERA, DEFAULT_FINISH, DEFAULT_WORLD } from './sceneDefaults'
 import { createBlankScene, createStarterScene } from './starterScene'
 
 describe('blank scene', () => {
@@ -11,6 +12,9 @@ describe('blank scene', () => {
     expect(scene.objectSequence).toBe(0)
     expect(scene.objects).toHaveLength(0)
     expect(scene.world.floor.type).toBe('reflective')
+    expect(scene.world).toEqual(DEFAULT_WORLD)
+    expect(scene.camera).toEqual(DEFAULT_CAMERA)
+    expect(scene.finish).toEqual(DEFAULT_FINISH)
     expect(normalizeSceneConfig(scene)).toEqual(scene)
   })
 })
