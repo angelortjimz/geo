@@ -103,9 +103,19 @@ export function createObjectConfig(sequence: number): SceneObjectConfig {
 }
 
 function applyObjectPatch(base: SceneObjectConfig, patch: ObjectPatch): SceneObjectConfig {
+  const form = patch.form ? normalizeForm({ ...base.form, ...patch.form }) : base.form
+  const primitivePrefix = `${PRIMITIVE_LABELS[base.form.primitive]} `
+  // Generated names follow the primitive; curated names (such as the starter
+  // scene's) are left untouched.
+  const name =
+    form.primitive !== base.form.primitive && base.name.startsWith(primitivePrefix)
+      ? `${PRIMITIVE_LABELS[form.primitive]} ${base.name.slice(primitivePrefix.length)}`
+      : base.name
+
   return {
     ...base,
-    form: patch.form ? normalizeForm({ ...base.form, ...patch.form }) : base.form,
+    name,
+    form,
     transform: patch.transform
       ? normalizeTransform({ ...base.transform, ...patch.transform })
       : base.transform,

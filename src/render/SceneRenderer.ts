@@ -206,6 +206,7 @@ export class SceneRenderer {
   private viewportWidth = 1
   private viewportHeight = 1
   private viewportPixelRatio = 1
+  private viewportDevicePixelRatio = 1
   private frameId: number | null = null
   private lastTime = 0
   private captureTarget: HTMLCanvasElement | null = null
@@ -330,6 +331,7 @@ export class SceneRenderer {
     this.viewportWidth = safeWidth
     this.viewportHeight = safeHeight
     this.viewportPixelRatio = pixelRatio
+    this.viewportDevicePixelRatio = devicePixelRatio || 1
 
     this.camera.aspect = safeWidth / safeHeight
     this.camera.updateProjectionMatrix()
@@ -352,11 +354,17 @@ export class SceneRenderer {
       return
     }
 
+    const previousDprCap = this.config.canvas.dprCap
     this.config = next
     this.syncObjects(next)
     this.syncWorld(next.world)
     this.syncCamera(next.camera)
     this.syncFinish(next.finish)
+
+    if (next.canvas.dprCap !== previousDprCap) {
+      this.resize(this.viewportWidth, this.viewportHeight, this.viewportDevicePixelRatio)
+    }
+
     this.updateFrame(0)
   }
 

@@ -16,22 +16,22 @@ A low-polygon chrome object floats above an infinite reflective floor. It rotate
 
 ## 2. Confirmed Decisions
 
-| Area | Decision |
-| --- | --- |
-| Dominant aesthetic | Clean, surreal early CGI; no heavy glitch or constant degradation |
-| Initial experience | Empty scene with optional starter-scene action |
-| Audio signals | Loudness, transients, and some stereo information |
-| Initial stereo signals | Normalized balance and mid/side-derived width |
-| Scene persistence | Session-local only; no localStorage, autosave, or scene files |
-| Audio input | Local file upload and drag-and-drop, adapted from typo |
-| Framework | React with strict TypeScript |
-| Build tooling | Vite with pnpm 12.6.0 |
-| Rendering | Direct Three.js and WebGL, not React Three Fiber |
-| Animation | One `requestAnimationFrame` loop outside React rendering |
-| Interface | Large canvas, right inspector, full-width transport below |
-| Browser target | Desktop Chromium first |
-| Export | Full-track real-time MP4 with original audio, adapted from typo |
-| Backend/privacy | None; local-only audio and no analytics |
+| Area                   | Decision                                                          |
+| ---------------------- | ----------------------------------------------------------------- |
+| Dominant aesthetic     | Clean, surreal early CGI; no heavy glitch or constant degradation |
+| Initial experience     | Empty scene with optional starter-scene action                    |
+| Audio signals          | Loudness, transients, and some stereo information                 |
+| Initial stereo signals | Normalized balance and mid/side-derived width                     |
+| Scene persistence      | Session-local only; no localStorage, autosave, or scene files     |
+| Audio input            | Local file upload and drag-and-drop, adapted from typo            |
+| Framework              | React with strict TypeScript                                      |
+| Build tooling          | Vite with pnpm 12.6.0                                             |
+| Rendering              | Direct Three.js and WebGL, not React Three Fiber                  |
+| Animation              | One `requestAnimationFrame` loop outside React rendering          |
+| Interface              | Large canvas, right inspector, full-width transport below         |
+| Browser target         | Desktop Chromium first                                            |
+| Export                 | Full-track real-time MP4 with original audio, adapted from typo   |
+| Backend/privacy        | None; local-only audio and no analytics                           |
 
 ## 3. Art Direction
 
@@ -60,12 +60,12 @@ The editor remains restrained and contemporary; the early-CGI aesthetic belongs 
 
 Each scene object is a small visual instrument with four groups:
 
-| Group | Creative controls |
-| --- | --- |
-| Form | Primitive, proportions, detail, flat/smooth shading |
-| Surface | Material, palette, reflectivity, emission, wireframe |
-| Motion | Rotation, floating, orbiting, drift, speed, phase |
-| Reaction | Loudness, transient, and stereo behaviors |
+| Group    | Creative controls                                    |
+| -------- | ---------------------------------------------------- |
+| Form     | Primitive, proportions, detail, flat/smooth shading  |
+| Surface  | Material, palette, reflectivity, emission, wireframe |
+| Motion   | Rotation, floating, orbiting, drift, speed, phase    |
+| Reaction | Loudness, transient, and stereo behaviors            |
 
 Global controls are divided into:
 
@@ -191,14 +191,14 @@ Width alters spatial relationships, not chromatic aberration. Mono or centered i
 
 ### Initial object behaviors
 
-| Behavior | Signal | Visual result |
-| --- | --- | --- |
-| Breathe | Level | Gentle scale expansion and contraction |
-| Strike | Impact | Springy compression or positional kick |
-| Spin | Intensity | Rotation accelerates with sustained energy |
-| Drift | Balance | Subtle stereo-linked spatial movement |
-| Expand | Width | Orbit radius or object spread increases |
-| Flare | Impact or level | Brief restrained emissive highlight |
+| Behavior | Signal          | Visual result                              |
+| -------- | --------------- | ------------------------------------------ |
+| Breathe  | Level           | Gentle scale expansion and contraction     |
+| Strike   | Impact          | Springy compression or positional kick     |
+| Spin     | Intensity       | Rotation accelerates with sustained energy |
+| Drift    | Balance         | Subtle stereo-linked spatial movement      |
+| Expand   | Width           | Orbit radius or object spread increases    |
+| Flare    | Impact or level | Brief restrained emissive highlight        |
 
 Global performance options may include impact-to-camera impulse, intensity-to-bloom, balance-to-camera pan, and width-to-light separation. Each needs conservative limits.
 
@@ -335,7 +335,7 @@ Selected modules should be ported into this project; no shared package or monore
 
 ## 10. Milestones
 
-The project scaffold and documentation are initialized. **Milestone 1 is implemented and verified.** Milestone 2 is next and has not begun. All behavior checkboxes below remain unchecked until implemented and verified.
+The project scaffold and documentation are initialized. **Milestones 1 and 2 are implemented and verified.** Milestone 3 is next. All behavior checkboxes below remain unchecked until implemented and verified.
 
 ### Milestone 1 — Fixed Visual Study and Capture Spike
 
@@ -364,14 +364,14 @@ The project scaffold and documentation are initialized. **Milestone 1 is impleme
 
 **Goal:** Generalize the visual study into a focused multi-object editor.
 
-- [ ] Add versioned scene configuration and stable object identities.
-- [ ] Implement empty state and optional starter-scene loading.
-- [ ] Add, select, duplicate, and remove objects.
-- [ ] Add primitive, transform, material, motion, and reaction inspectors.
-- [ ] Add solid/gradient backdrops and initial floor modes.
-- [ ] Add camera navigation, lighting, fog, and bloom controls.
-- [ ] Keep all scene state session-local.
-- [ ] Preserve the composed base state under every audio behavior.
+- [x] Add versioned scene configuration and stable object identities.
+- [x] Implement empty state and optional starter-scene loading.
+- [x] Add, select, duplicate, and remove objects.
+- [x] Add primitive, transform, material, motion, and reaction inspectors.
+- [x] Add solid/gradient backdrops and initial floor modes.
+- [x] Add camera navigation, lighting, fog, and bloom controls.
+- [x] Keep all scene state session-local.
+- [x] Preserve the composed base state under every audio behavior.
 
 **Exit criteria**
 

@@ -129,13 +129,14 @@ export function createStarterScene(): SceneConfig {
     ],
     world: {
       backdrop: {
-        type: 'solid',
-        color: '#c9d6dc',
+        type: 'gradient',
+        top: '#b9dce3',
+        horizon: '#ddd7e9',
+        bottom: '#94a9b5',
       },
       floor: {
-        type: 'checker',
-        lightColor: '#dfe4e2',
-        darkColor: '#8f9c9f',
+        type: 'reflective',
+        color: '#9daebf',
         size: 80,
         fadeStart: 7,
         fadeEnd: 29,

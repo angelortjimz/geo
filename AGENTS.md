@@ -4,9 +4,9 @@ geo is a client-only, audio-played early-CGI scene composer. Users build sparse,
 
 Read `docs/roadmap.md` before changing scope. Implement only the current milestone unless the user explicitly requests otherwise.
 
-Current status: Milestone 1 — fixed visual study and five-second WebGL capture spike — is implemented and verified. Milestone 2, the blank scene editor, is next and not started. Full-track export, the full primitive/material library, and release hardening remain later milestones.
+Current status: Milestone 1 (fixed visual study and five-second WebGL capture spike) and Milestone 2 (blank scene editor) are implemented and verified. Milestone 3, creative and performance polish, is next. Full-track export, the full primitive/material library, generation, and release hardening remain later milestones.
 
-Do not add editor, starter-scene, full-export, or polish scope until the corresponding milestone is authorized.
+Do not add full-export, generation, fullscreen/aspect-format, or polish scope until the corresponding milestone is authorized.
 
 ## Non-Negotiable Rules
 
@@ -37,7 +37,7 @@ Do not add editor, starter-scene, full-export, or polish scope until the corresp
 - Player volume must not affect analysis or exported audio.
 - Scene configuration is session-local. Do not add `localStorage`, autosave, accounts, scene files, or persistent profiles without a new approved requirement.
 - Keep the full scene document versioned from its introduction so persistence can be considered later without coupling it to the current release.
-- Start with an empty scene and offer one optional, highly polished starter scene. Do not force the starter scene on launch. This behavior belongs to Milestone 2.
+- Start with an empty scene and offer one optional, highly polished starter scene. Do not force the starter scene on launch. The editor implements this through its welcome state.
 
 ## Commands and Environment
 
@@ -61,25 +61,27 @@ Do not add scripts that bypass this toolchain or introduce a second checker.
 src/
   App.tsx, main.tsx, styles.css  workspace shell and global styles
   audio/       AudioEngine, playback, validation, feature extraction, audio hook
-  scene/       versioned SceneConfig and scene constants
+  editor/      session-local scene document, selection, welcome/editing flow
+  scene/       versioned SceneConfig, limits, normalization, operations, starter
   motion/      envelopes, springs, bounded behavior helpers
-  render/      SceneRenderer, environment, reflections, selective bloom
+  render/      SceneRenderer, object factory, textures, reflections, bloom
   export/      five-second capture orchestration, canvas bridge, MP4 checks
-  components/  canvas, upload, transport, capture, workspace UI
-docs/          product roadmap
+  components/  canvas, upload, transport, capture, inspector, welcome, workspace UI
+docs/          product roadmap and milestone plan
 ```
 
 Group files by feature or responsibility. Keep React components, domain types, browser engines, and pure utilities clearly separated. Do not reorganize the structure without a concrete reason.
 
 ## Architecture and Ownership
 
-| Layer             | Owns                                                                                          | Must not own                                      |
-| ----------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| React components  | Scene configuration, selection, inspector and transport UI, upload state, accessible behavior | Per-frame values, sample arrays, Three.js objects |
-| `AudioEngine`     | `AudioContext`, audio graph, playback offsets, analysis routing, decoding, cleanup            | React state, scene rendering                      |
-| Feature extractor | Pure time-domain to signal math                                                               | React, Three.js, avoidable browser coupling       |
-| `SceneRenderer`   | Three.js scene, camera, materials, post-processing, animation loop, GPU lifecycle             | React state, audio decoding                       |
-| Pure modules      | Envelopes, springs, seeded generation, validation, sizing and timing                          | Direct browser coupling                           |
+| Layer             | Owns                                                                                  | Must not own                                      |
+| ----------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `useSceneEditor`  | Session-local scene document, selection, welcome/editing mode, dirty replacement flow | Per-frame values, Three.js objects, persistence   |
+| React components  | Inspector and transport UI, upload state, accessible behavior                         | Per-frame values, sample arrays, Three.js objects |
+| `AudioEngine`     | `AudioContext`, audio graph, playback offsets, analysis routing, decoding, cleanup    | React state, scene rendering                      |
+| Feature extractor | Pure time-domain to signal math                                                       | React, Three.js, avoidable browser coupling       |
+| `SceneRenderer`   | Three.js scene, camera, materials, post-processing, animation loop, GPU lifecycle     | React state, audio decoding                       |
+| Pure modules      | Envelopes, springs, seeded generation, validation, sizing and timing                  | Direct browser coupling                           |
 
 - Keep browser engines independent of React so they can be tested and tuned separately.
 - Expose small, explicitly typed APIs instead of distributing implementation details across components.
@@ -216,7 +218,7 @@ Make disposal safe to call more than once where practical. Test cleanup in devel
 - Use Scene, Object, World, and Finish inspector views to contain complexity. Do not force every control to remain visible at once.
 - Keep controls labeled, keyboard accessible, and visually subordinate to the artwork. Use consistent spacing, typography, sizing, and states.
 - Do not add fake, disabled, or decorative placeholder controls. Provide meaningful empty, loading, error, and unavailable states.
-- The empty state offers Blank scene and Load starter scene as real actions. This belongs to Milestone 2.
+- The welcome state offers Blank scene and Load starter scene as real actions. Editing keeps the editor open when the last object is removed.
 - Give every control an accessible name. Use semantic HTML, visible focus indicators, sufficient contrast, and labels associated with their controls.
 - Do not communicate state using color alone. Support reduced-motion preferences for interface transitions and avoid unnecessary interface motion.
 - Hide meaningless scene-graph internals from assistive technology. All editing actions need accessible controls and meaningful feedback.

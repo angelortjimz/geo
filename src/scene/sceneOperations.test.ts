@@ -104,6 +104,16 @@ describe('scene object operations', () => {
     expect(patchObject(scene, 'missing', { motion: { spin: 1 } })).toBe(scene)
   })
 
+  it('renames generated objects when their primitive changes and preserves curated names', () => {
+    const scene = addObject(createBlankScene())
+    const box = patchObject(scene, 'object-1', { form: { primitive: 'box' } })
+    expect(box.objects[0].name).toBe('Box 1')
+
+    const starter = createStarterScene()
+    const patched = patchObject(starter, 'object-1', { form: { primitive: 'icosahedron' } })
+    expect(patched.objects[0].name).toBe('Chrome torus')
+  })
+
   it('keeps the composed base transform when only reactions change', () => {
     const scene = createStarterScene()
     const patched = patchObject(scene, 'object-2', {

@@ -2,8 +2,11 @@ import { useRef, useState } from 'react'
 import { useAudioEngine } from './audio/useAudioEngine'
 import { AudioUpload } from './components/AudioUpload'
 import { CaptureControl } from './components/CaptureControl'
+import { Inspector } from './components/inspector/Inspector'
 import { PlaybackControls } from './components/PlaybackControls'
 import { SceneCanvas } from './components/SceneCanvas'
+import { WelcomeIntro, WelcomeOverlay } from './components/Welcome'
+import { useSceneEditor } from './editor/useSceneEditor'
 import type { SceneCaptureHandle } from './export/captureTypes'
 import { useCaptureSpike } from './export/useCaptureSpike'
 
@@ -12,9 +15,11 @@ export default function App() {
   const { capture, snapshot: captureSnapshot } = useCaptureSpike(engine)
   const sceneRef = useRef<SceneCaptureHandle>(null)
   const dragDepthRef = useRef(0)
+  const editor = useSceneEditor()
   const [dropActive, setDropActive] = useState(false)
   const captureActive = ['preparing', 'recording', 'finalizing'].includes(captureSnapshot.status)
   const trackReady = ['ready', 'playing', 'paused', 'ended'].includes(snapshot.status)
+  const isWelcome = editor.mode === 'welcome'
 
   const loadFile = (file: File) => {
     if (captureActive) {
@@ -60,49 +65,28 @@ export default function App() {
         }
       }}
     >
-      <SceneCanvas ref={sceneRef} engine={engine} />
+      <SceneCanvas
+        ref={sceneRef}
+        engine={engine}
+        scene={editor.scene}
+        cameraLocked={captureActive}
+        onCameraChange={editor.actions.patchCamera}
+      />
 
-      <aside className="composition-panel" aria-label="Visual study information">
-        <header className="app-header">
+      {isWelcome && (
+        <WelcomeOverlay
+          onStartBlank={editor.actions.requestBlank}
+          onLoadStarter={editor.actions.requestStarter}
+        />
+      )}
+
+      <aside className="composition-panel" aria-label="Scene workspace">
+        <header className={`app-header${isWelcome ? ' app-header--welcome' : ''}`}>
           <h1 className="app-name">geo</h1>
           <p className="app-tagline">An audio-played CGI scene composer.</p>
         </header>
 
-        <section className="milestone" aria-labelledby="study-title">
-          <span className="milestone__status">Visual study 01 · Fixed composition</span>
-          <h2 id="study-title">Chrome in a pale atmosphere.</h2>
-          <p>
-            A reflective torus and an emissive satellite hold their composition in silence. Sound
-            adds breath, impact, and movement through stereo space.
-          </p>
-          <dl className="signal-list">
-            <div>
-              <dt>Level</dt>
-              <dd>Gentle breathing</dd>
-            </div>
-            <div>
-              <dt>Impact</dt>
-              <dd>Spring compression and flare</dd>
-            </div>
-            <div>
-              <dt>Energy</dt>
-              <dd>Sustained rotation</dd>
-            </div>
-            <div>
-              <dt>Balance</dt>
-              <dd>Satellite drift</dd>
-            </div>
-            <div>
-              <dt>Width</dt>
-              <dd>Orbital expansion</dd>
-            </div>
-          </dl>
-        </section>
-
-        <p className="study-note">
-          Choose or drop a local audio file. The five-second capture is a technical study;
-          full-track export arrives in a later milestone.
-        </p>
+        {isWelcome ? <WelcomeIntro /> : <Inspector editor={editor} locked={captureActive} />}
       </aside>
 
       <footer className="transport" aria-label="Audio playback and capture">
@@ -120,7 +104,7 @@ export default function App() {
         />
         <CaptureControl
           snapshot={captureSnapshot}
-          disabled={!trackReady || captureActive}
+          disabled={!trackReady || captureActive || isWelcome}
           onStart={() => {
             const handle = sceneRef.current
             if (handle) {
@@ -140,14 +124,16 @@ export default function App() {
             {snapshot.error ??
               captureSnapshot.error ??
               (captureSnapshot.status === 'recording'
-                ? 'Recording the post-processed WebGL study…'
+                ? 'Recording the scene…'
                 : captureSnapshot.status === 'finalizing'
                   ? 'Finalizing MP4…'
                   : captureSnapshot.status === 'complete'
                     ? `Saved ${captureSnapshot.fileName}`
-                    : snapshot.status === 'idle'
-                      ? 'Drop audio anywhere to begin'
-                      : null)}
+                    : isWelcome
+                      ? 'Choose a blank or starter scene to begin.'
+                      : snapshot.status === 'idle'
+                        ? 'Drop audio anywhere to begin'
+                        : null)}
           </span>
         </div>
       </footer>
