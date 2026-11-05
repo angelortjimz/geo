@@ -6,6 +6,8 @@ export interface NumericRange {
 }
 
 export const MAX_OBJECT_COUNT = 12
+export const SEED_RANGE: NumericRange = { minimum: 0, maximum: 999_999 }
+export const GENERATION_SEQUENCE_RANGE: NumericRange = { minimum: 0, maximum: 9_999 }
 
 export const DPR_CAP_RANGE: NumericRange = { minimum: 1, maximum: 3 }
 
@@ -27,6 +29,7 @@ export const PHASE_RANGE: NumericRange = { minimum: 0, maximum: 1 }
 export const BREATHE_RANGE: NumericRange = { minimum: 0, maximum: 0.2 }
 export const STRIKE_RANGE: NumericRange = { minimum: 0, maximum: 0.25 }
 export const FLARE_RANGE: NumericRange = { minimum: 0, maximum: 1 }
+export const ENERGY_RANGE: NumericRange = { minimum: 0, maximum: 1 }
 export const DRIFT_RANGE: NumericRange = { minimum: 0, maximum: 1.5 }
 export const EXPAND_RANGE: NumericRange = { minimum: 0, maximum: 2 }
 

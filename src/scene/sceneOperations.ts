@@ -1,3 +1,5 @@
+import type { AspectRatioKind } from './aspectRatio'
+import { isAspectRatioKind } from './aspectRatio'
 import { PRIMITIVE_LABELS } from './sceneConfig'
 import type {
   BackdropConfig,
@@ -22,7 +24,13 @@ import {
   DEFAULT_OBJECT_MOTION,
   DEFAULT_OBJECT_REACTION,
 } from './sceneDefaults'
-import { MAX_OBJECT_COUNT, clampNumber, DPR_CAP_RANGE } from './sceneLimits'
+import {
+  DPR_CAP_RANGE,
+  MAX_OBJECT_COUNT,
+  SEED_RANGE,
+  clampInteger,
+  clampNumber,
+} from './sceneLimits'
 import {
   normalizeBackdrop,
   normalizeCamera,
@@ -222,9 +230,24 @@ export function patchFinish(scene: SceneConfig, patch: FinishPatch): SceneConfig
   }
 }
 
+export function setSeed(scene: SceneConfig, seed: number): SceneConfig {
+  return {
+    ...scene,
+    seed: clampInteger(seed, SEED_RANGE, scene.seed),
+  }
+}
+
 export function setDprCap(scene: SceneConfig, dprCap: number): SceneConfig {
   return {
     ...scene,
-    canvas: { dprCap: clampNumber(dprCap, DPR_CAP_RANGE, scene.canvas.dprCap) },
+    canvas: { ...scene.canvas, dprCap: clampNumber(dprCap, DPR_CAP_RANGE, scene.canvas.dprCap) },
+  }
+}
+
+export function setCanvasFormat(scene: SceneConfig, format: AspectRatioKind): SceneConfig {
+  const safeFormat = isAspectRatioKind(format) ? format : scene.canvas.format
+  return {
+    ...scene,
+    canvas: { ...scene.canvas, format: safeFormat },
   }
 }

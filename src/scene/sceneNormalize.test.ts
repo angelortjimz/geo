@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import type { AspectRatioKind } from './aspectRatio'
 import { createObjectConfig } from './sceneOperations'
 import { MAX_OBJECT_COUNT } from './sceneLimits'
 import {
   DEFAULT_CAMERA,
+  DEFAULT_CANVAS,
   DEFAULT_DPR_CAP,
   DEFAULT_OBJECT_FORM,
   DEFAULT_OBJECT_MATERIAL,
@@ -40,6 +42,7 @@ function createInvalidObject(): SceneObjectConfig {
       breathe: 9,
       strike: -2,
       flare: 9,
+      energy: 9,
       drift: -1,
       expand: 99,
     },
@@ -73,8 +76,27 @@ describe('scene normalization', () => {
     expect(object.reaction.breathe).toBe(0.2)
     expect(object.reaction.strike).toBe(0)
     expect(object.reaction.flare).toBe(1)
+    expect(object.reaction.energy).toBe(1)
     expect(object.reaction.drift).toBe(0)
     expect(object.reaction.expand).toBe(2)
+  })
+
+  it('accepts the expanded primitive and material libraries', () => {
+    for (const primitive of ['torusKnot', 'cone', 'cylinder'] as const) {
+      const object = normalizeObjectConfig({
+        ...createObjectConfig(1),
+        form: { ...DEFAULT_OBJECT_FORM, primitive },
+      })
+      expect(object.form.primitive).toBe(primitive)
+    }
+
+    for (const kind of ['matte', 'wireframe'] as const) {
+      const object = normalizeObjectConfig({
+        ...createObjectConfig(1),
+        material: { ...DEFAULT_OBJECT_MATERIAL, kind },
+      })
+      expect(object.material.kind).toBe(kind)
+    }
   })
 
   it('keeps object ids unique and caps the object count', () => {
@@ -128,7 +150,7 @@ describe('scene normalization', () => {
     const base = createBlankScene()
     const normalized = normalizeSceneConfig({
       ...base,
-      canvas: { dprCap: Number.NaN },
+      canvas: { ...DEFAULT_CANVAS, dprCap: Number.NaN },
       camera: {
         ...base.camera,
         distance: Number.NaN,
@@ -164,7 +186,8 @@ describe('scene normalization', () => {
       ...base,
       seed: -12.7,
       objectSequence: -3,
-      canvas: { dprCap: 9 },
+      generationSequence: -3,
+      canvas: { ...DEFAULT_CANVAS, dprCap: 9, format: '5:4' as AspectRatioKind },
       camera: {
         target: [100, 100, 100],
         distance: 100,
@@ -183,7 +206,9 @@ describe('scene normalization', () => {
     expect(normalized.version).toBe(SCENE_VERSION)
     expect(normalized.seed).toBe(0)
     expect(normalized.objectSequence).toBe(0)
+    expect(normalized.generationSequence).toBe(0)
     expect(normalized.canvas.dprCap).toBe(3)
+    expect(normalized.canvas.format).toBe(DEFAULT_CANVAS.format)
     expect(normalized.camera).toEqual({
       target: [12, 12, 12],
       distance: 30,

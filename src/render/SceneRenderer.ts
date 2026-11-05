@@ -47,6 +47,7 @@ import type {
   FloorConfig,
   FogConfig,
   LightingConfig,
+  MaterialConfig,
   SceneConfig,
   SceneObjectConfig,
   WorldConfig,
@@ -54,11 +55,13 @@ import type {
 import {
   EMISSION_INTENSITY_SCALE,
   FLARE_INTENSITY_SCALE,
+  WIREFRAME_EMISSION_SCALE,
   applyObjectMaterial,
   createObjectMaterial,
   createPrimitiveGeometry,
   getGeometryKey,
   getMaterialKey,
+  shouldMaterialBloom,
 } from './objectFactory'
 import {
   createBackdropTexture,
@@ -122,6 +125,17 @@ interface FloorRuntime {
 
 function clamp(value: number, minimum: number, maximum: number): number {
   return Math.min(maximum, Math.max(minimum, value))
+}
+
+function getBaseEmission(material: MaterialConfig): number {
+  switch (material.kind) {
+    case 'emissive':
+      return material.emission * EMISSION_INTENSITY_SCALE
+    case 'wireframe':
+      return material.emission * WIREFRAME_EMISSION_SCALE
+    default:
+      return 0
+  }
 }
 
 function hashText(value: string): number {
@@ -430,8 +444,8 @@ export class SceneRenderer {
     this.lastTime = timeMilliseconds
     this.updateFrame(deltaSeconds)
 
-    // Render only emissive objects into the bloom chain, then composite the glow
-    // back over the sharp chrome, plastic, and floor.
+    // Render only bloom-enabled emissive and wireframe objects into the bloom
+    // chain, then composite the glow back over the sharp materials and floor.
     if (this.config.finish.bloom.enabled) {
       const background = this.scene.background
       this.scene.background = null
@@ -550,8 +564,7 @@ export class SceneRenderer {
         Math.sin(this.clock * wobble.rollSpeed + phase * 0.5) * wobble.rollAmplitude,
     )
 
-    const baseEmission =
-      config.material.kind === 'emissive' ? config.material.emission * EMISSION_INTENSITY_SCALE : 0
+    const baseEmission = getBaseEmission(config.material)
     runtime.mesh.material.emissiveIntensity =
       baseEmission + runtime.flare * reaction.flare * FLARE_INTENSITY_SCALE
 
@@ -695,7 +708,7 @@ export class SceneRenderer {
   }
 
   private syncRuntimeLayers(runtime: ObjectRuntime): void {
-    if (runtime.config.material.kind === 'emissive') {
+    if (shouldMaterialBloom(runtime.config.material)) {
       runtime.mesh.layers.enable(BLOOM_LAYER)
     } else {
       runtime.mesh.layers.disable(BLOOM_LAYER)

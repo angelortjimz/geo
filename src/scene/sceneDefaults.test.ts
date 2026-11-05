@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_BLOOM,
   DEFAULT_CAMERA,
+  DEFAULT_CANVAS,
   DEFAULT_CHECKER_FLOOR,
   DEFAULT_DPR_CAP,
   DEFAULT_FINISH,
@@ -12,6 +13,7 @@ import {
   DEFAULT_OBJECT_MOTION,
   DEFAULT_OBJECT_REACTION,
   DEFAULT_REFLECTIVE_FLOOR,
+  DEFAULT_SEED,
 } from './sceneDefaults'
 import {
   AMBIENT_INTENSITY_RANGE,
@@ -27,6 +29,7 @@ import {
   DPR_CAP_RANGE,
   DRIFT_RANGE,
   EMISSION_RANGE,
+  ENERGY_RANGE,
   EXPAND_RANGE,
   EXPOSURE_RANGE,
   FLARE_RANGE,
@@ -42,6 +45,7 @@ import {
   ORBIT_RADIUS_RANGE,
   ORBIT_SPEED_RANGE,
   PHASE_RANGE,
+  SEED_RANGE,
   SPIN_RANGE,
   STRIKE_RANGE,
   type NumericRange,
@@ -55,6 +59,7 @@ function expectInRange(value: number, range: NumericRange): void {
 
 describe('canonical scene defaults', () => {
   it('keeps every default inside its editable range', () => {
+    expectInRange(DEFAULT_SEED, SEED_RANGE)
     expectInRange(DEFAULT_DPR_CAP, DPR_CAP_RANGE)
     expectInRange(DEFAULT_CAMERA.distance, CAMERA_DISTANCE_RANGE)
     expectInRange(DEFAULT_CAMERA.elevation, CAMERA_ELEVATION_RANGE)
@@ -76,6 +81,7 @@ describe('canonical scene defaults', () => {
     expectInRange(DEFAULT_OBJECT_REACTION.breathe, BREATHE_RANGE)
     expectInRange(DEFAULT_OBJECT_REACTION.strike, STRIKE_RANGE)
     expectInRange(DEFAULT_OBJECT_REACTION.flare, FLARE_RANGE)
+    expectInRange(DEFAULT_OBJECT_REACTION.energy, ENERGY_RANGE)
     expectInRange(DEFAULT_OBJECT_REACTION.drift, DRIFT_RANGE)
     expectInRange(DEFAULT_OBJECT_REACTION.expand, EXPAND_RANGE)
     expectInRange(DEFAULT_REFLECTIVE_FLOOR.size, FLOOR_SIZE_RANGE)
@@ -98,5 +104,9 @@ describe('canonical scene defaults', () => {
     expect(object.material).toEqual(DEFAULT_OBJECT_MATERIAL)
     expect(object.motion).toEqual(DEFAULT_OBJECT_MOTION)
     expect(object.reaction).toEqual(DEFAULT_OBJECT_REACTION)
+  })
+
+  it('shares the canonical canvas default', () => {
+    expect(DEFAULT_CANVAS).toEqual({ dprCap: DEFAULT_DPR_CAP, format: '16:9' })
   })
 })

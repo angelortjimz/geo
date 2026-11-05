@@ -2,7 +2,7 @@ import type { SceneConfig } from './sceneConfig'
 import { SCENE_VERSION } from './sceneConfig'
 import {
   DEFAULT_CAMERA,
-  DEFAULT_DPR_CAP,
+  DEFAULT_CANVAS,
   DEFAULT_FINISH,
   DEFAULT_LINEAR_FOG,
   DEFAULT_REFLECTIVE_FLOOR,
@@ -17,7 +17,8 @@ export function createBlankScene(): SceneConfig {
     version: SCENE_VERSION,
     seed: DEFAULT_SEED,
     objectSequence: 0,
-    canvas: { dprCap: DEFAULT_DPR_CAP },
+    generationSequence: 0,
+    canvas: DEFAULT_CANVAS,
     objects: [],
     world: DEFAULT_WORLD,
     camera: DEFAULT_CAMERA,
@@ -34,7 +35,8 @@ export function createStarterScene(): SceneConfig {
     version: SCENE_VERSION,
     seed: DEFAULT_SEED,
     objectSequence: 2,
-    canvas: { dprCap: DEFAULT_DPR_CAP },
+    generationSequence: 0,
+    canvas: DEFAULT_CANVAS,
     objects: [
       {
         id: 'object-1',
@@ -58,6 +60,7 @@ export function createStarterScene(): SceneConfig {
           breathe: 0.065,
           strike: 0.16,
           flare: 0.65,
+          energy: 0.55,
           drift: 0,
           expand: 0,
         },
@@ -84,6 +87,7 @@ export function createStarterScene(): SceneConfig {
           breathe: 0,
           strike: 0,
           flare: 0.25,
+          energy: 0.18,
           drift: 0.52,
           expand: 0.82,
         },

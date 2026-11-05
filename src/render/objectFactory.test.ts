@@ -5,6 +5,7 @@ import {
   createPrimitiveGeometry,
   getGeometryKey,
   getMaterialKey,
+  shouldMaterialBloom,
 } from './objectFactory'
 
 const SMOOTH_TORUS: FormConfig = { primitive: 'torus', detail: 1, flatShading: false }
@@ -35,6 +36,16 @@ describe('object factory', () => {
     )
     lowIcosahedron.dispose()
     highIcosahedron.dispose()
+
+    for (const primitive of ['torusKnot', 'cone', 'cylinder'] as const) {
+      const low = createPrimitiveGeometry({ primitive, detail: 1, flatShading: false })
+      const high = createPrimitiveGeometry({ primitive, detail: 4, flatShading: false })
+      expect(high.getAttribute('position').count).toBeGreaterThan(
+        low.getAttribute('position').count,
+      )
+      low.dispose()
+      high.dispose()
+    }
   })
 
   it('applies material presets and flat shading', () => {
@@ -52,6 +63,43 @@ describe('object factory', () => {
     expect(flatEmissive.emissiveIntensity).toBe(0)
     expect(flatEmissive.metalness).toBeLessThan(1)
     flatEmissive.dispose()
+
+    const matte = createObjectMaterial(SMOOTH_TORUS, {
+      kind: 'matte',
+      color: '#dde3e4',
+      gloss: 0.8,
+      emission: 0,
+    })
+    expect(matte.metalness).toBe(0)
+    expect(matte.roughness).toBeGreaterThan(0.7)
+    expect(matte.clearcoat).toBe(0)
+    matte.dispose()
+
+    const wireframe = createObjectMaterial(SMOOTH_TORUS, {
+      kind: 'wireframe',
+      color: '#b7f5ff',
+      gloss: 0.6,
+      emission: 0.4,
+    })
+    expect(wireframe.wireframe).toBe(true)
+    expect(wireframe.metalness).toBeLessThan(1)
+    wireframe.dispose()
+  })
+
+  it('selects solid emissive and emissive wireframe materials for bloom', () => {
+    const emissive: MaterialConfig = {
+      kind: 'emissive',
+      color: '#b7f5ff',
+      gloss: 0.5,
+      emission: 0,
+    }
+    const glowingWireframe: MaterialConfig = { ...emissive, kind: 'wireframe', emission: 0.4 }
+    const darkWireframe: MaterialConfig = { ...glowingWireframe, emission: 0 }
+
+    expect(shouldMaterialBloom(emissive)).toBe(true)
+    expect(shouldMaterialBloom(glowingWireframe)).toBe(true)
+    expect(shouldMaterialBloom(darkWireframe)).toBe(false)
+    expect(shouldMaterialBloom(CHROME)).toBe(false)
   })
 
   it('rebuilds geometry only for primitive or detail changes', () => {

@@ -1,17 +1,42 @@
+import type { AspectRatioKind } from './aspectRatio'
+
 export type Vector3Tuple = readonly [number, number, number]
 
-export const SCENE_VERSION = 2
+export const SCENE_VERSION = 3
 
-export type PrimitiveKind = 'torus' | 'box' | 'icosahedron'
-export type MaterialKind = 'chrome' | 'plastic' | 'emissive'
+export const PRIMITIVE_KINDS = [
+  'torus',
+  'torusKnot',
+  'box',
+  'icosahedron',
+  'cone',
+  'cylinder',
+] as const
+
+export type PrimitiveKind = (typeof PRIMITIVE_KINDS)[number]
+
+export const MATERIAL_KINDS = ['chrome', 'plastic', 'matte', 'emissive', 'wireframe'] as const
+
+export type MaterialKind = (typeof MATERIAL_KINDS)[number]
 export type BackdropKind = 'solid' | 'gradient'
 export type FloorKind = 'none' | 'reflective' | 'checker'
 export type FogKind = 'none' | 'linear'
 
 export const PRIMITIVE_LABELS: Record<PrimitiveKind, string> = {
   torus: 'Torus',
+  torusKnot: 'Torus knot',
   box: 'Box',
   icosahedron: 'Icosahedron',
+  cone: 'Cone',
+  cylinder: 'Cylinder',
+}
+
+export const MATERIAL_LABELS: Record<MaterialKind, string> = {
+  chrome: 'Chrome',
+  plastic: 'Glossy plastic',
+  matte: 'Matte',
+  emissive: 'Emissive',
+  wireframe: 'Wireframe',
 }
 
 export interface FormConfig {
@@ -33,7 +58,7 @@ export interface MaterialConfig {
   readonly color: string
   /** 0 is fully diffuse, 1 is mirror-like; mapped to roughness by the renderer. */
   readonly gloss: number
-  /** Emissive strength for the emissive material; unused by other kinds. */
+  /** Emissive strength for emissive and wireframe materials; unused by other kinds. */
   readonly emission: number
 }
 
@@ -54,6 +79,8 @@ export interface ReactionConfig {
   readonly breathe: number
   readonly strike: number
   readonly flare: number
+  /** Sustained intensity-driven rotation speed. */
+  readonly energy: number
   readonly drift: number
   readonly expand: number
 }
@@ -161,14 +188,17 @@ export interface FinishConfig {
 
 export interface SceneCanvasConfig {
   readonly dprCap: number
+  readonly format: AspectRatioKind
 }
 
 export interface SceneConfig {
   readonly version: typeof SCENE_VERSION
-  /** Reserved for Milestone 3 seeded generation. */
+  /** Shared seed for deterministic generation and object mutations. */
   readonly seed: number
   /** Monotonic counter backing stable object ids and names. */
   readonly objectSequence: number
+  /** Monotonic counter for deterministic repeated object mutations. */
+  readonly generationSequence: number
   readonly canvas: SceneCanvasConfig
   readonly objects: readonly SceneObjectConfig[]
   readonly world: WorldConfig

@@ -11,6 +11,7 @@ import type {
   MotionConfig,
   ReactionConfig,
   ReflectiveFloorConfig,
+  SceneCanvasConfig,
   WorldConfig,
 } from './sceneConfig'
 
@@ -18,9 +19,16 @@ import type {
 export const DEFAULT_SEED = 0x1994
 export const DEFAULT_DPR_CAP = 2
 
+export const DEFAULT_CANVAS: SceneCanvasConfig = {
+  dprCap: DEFAULT_DPR_CAP,
+  format: '16:9',
+}
+
 export const DEFAULT_MATERIAL_COLOR = '#e4edf2'
 export const DEFAULT_EMISSIVE_COLOR = '#b7f5ff'
 export const DEFAULT_EMISSIVE_EMISSION = 0.5
+export const DEFAULT_WIREFRAME_COLOR = '#b7f5ff'
+export const DEFAULT_WIREFRAME_EMISSION = 0.35
 
 export const DEFAULT_OBJECT_FORM: FormConfig = {
   primitive: 'torus',
@@ -48,6 +56,7 @@ export const DEFAULT_OBJECT_REACTION: ReactionConfig = {
   breathe: 0.06,
   strike: 0.14,
   flare: 0.35,
+  energy: 0.35,
   drift: 0,
   expand: 0,
 }

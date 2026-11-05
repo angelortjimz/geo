@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Bumped the scene document to version 3 with aspect-format, generation-sequence, and energy fields, added cone, cylinder, torus-knot, matte, and wireframe kinds, and taught the renderer to build all six primitives and selectively bloom glowing wireframes.
 - Generalized the fixed-study renderer into a config-driven renderer that builds, updates, and disposes arbitrary scene objects by stable id, applies world, floor, fog, lighting, camera, and finish settings in place, and selects between reflective and checkerboard floors without restarting the animation loop.
 - The five-second capture now records the current edited scene and locks scene editing with a visible note while capture is preparing, recording, or finalizing.
 - Live scene edits and camera navigation are applied to the existing renderer through a config diff, without remounting the canvas or restarting the animation loop.

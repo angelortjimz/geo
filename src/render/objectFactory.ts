@@ -1,19 +1,32 @@
 import {
   BoxGeometry,
   BufferGeometry,
+  ConeGeometry,
+  CylinderGeometry,
   IcosahedronGeometry,
   MeshPhysicalMaterial,
   TorusGeometry,
+  TorusKnotGeometry,
 } from 'three'
 import type { FormConfig, MaterialConfig } from '../scene/sceneConfig'
 
 const TORUS_RADIAL_SEGMENTS = [12, 20, 32, 48] as const
 const TORUS_TUBULAR_SEGMENTS = [24, 48, 96, 160] as const
+const RADIAL_SEGMENTS = [12, 24, 48, 96] as const
+const TORUS_KNOT_TUBULAR_SEGMENTS = [64, 96, 128, 192] as const
+const TORUS_KNOT_RADIAL_SEGMENTS = [8, 12, 16, 24] as const
 
 /** Emissive materials render at full strength when `emission` reaches 1. */
 export const EMISSION_INTENSITY_SCALE = 2.6
+/** Scales wireframe emission so thin lines remain legible without washing out the scene. */
+export const WIREFRAME_EMISSION_SCALE = 1.8
 /** Restrained bloom-visible flare added by transient impact. */
 export const FLARE_INTENSITY_SCALE = 1.35
+
+/** Selects the materials that may enter the selective bloom chain. */
+export function shouldMaterialBloom(material: MaterialConfig): boolean {
+  return material.kind === 'emissive' || (material.kind === 'wireframe' && material.emission > 0)
+}
 
 function clamp(value: number, minimum: number, maximum: number): number {
   return Math.min(maximum, Math.max(minimum, value))
@@ -33,10 +46,21 @@ export function createPrimitiveGeometry(form: FormConfig): BufferGeometry {
         TORUS_RADIAL_SEGMENTS[detailIndex(form.detail)],
         TORUS_TUBULAR_SEGMENTS[detailIndex(form.detail)],
       )
+    case 'torusKnot':
+      return new TorusKnotGeometry(
+        0.8,
+        0.24,
+        TORUS_KNOT_TUBULAR_SEGMENTS[detailIndex(form.detail)],
+        TORUS_KNOT_RADIAL_SEGMENTS[detailIndex(form.detail)],
+      )
     case 'box':
       return new BoxGeometry(1, 1, 1)
     case 'icosahedron':
       return new IcosahedronGeometry(1, Math.round(clamp(form.detail, 1, 4)))
+    case 'cone':
+      return new ConeGeometry(0.9, 1.8, RADIAL_SEGMENTS[detailIndex(form.detail)], 1)
+    case 'cylinder':
+      return new CylinderGeometry(0.7, 0.7, 1.6, RADIAL_SEGMENTS[detailIndex(form.detail)], 1)
   }
 }
 
@@ -77,6 +101,7 @@ export function applyObjectMaterial(
   material.emissive.set(config.color)
   material.emissiveIntensity = 0
   material.flatShading = form.flatShading
+  material.wireframe = config.kind === 'wireframe'
   material.clearcoat = 0
   material.clearcoatRoughness = 0
 
@@ -95,12 +120,22 @@ export function applyObjectMaterial(
       material.clearcoatRoughness = 0.22
       material.envMapIntensity = 0.9
       break
+    case 'matte':
+      material.metalness = 0
+      material.roughness = clamp(0.98 - gloss * 0.2, 0.7, 1)
+      material.envMapIntensity = 0.35
+      break
     case 'emissive':
       material.metalness = 0.12
       material.roughness = clamp(1 - gloss * 0.8, 0.1, 1)
       material.clearcoat = 0.15
       material.clearcoatRoughness = 0.3
       material.envMapIntensity = 0.75
+      break
+    case 'wireframe':
+      material.metalness = 0.05
+      material.roughness = clamp(1 - gloss * 0.15, 0.8, 1)
+      material.envMapIntensity = 0.25
       break
   }
 

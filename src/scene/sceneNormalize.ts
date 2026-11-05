@@ -16,6 +16,7 @@ import type {
   PrimitiveKind,
   ReactionConfig,
   ReflectiveFloorConfig,
+  SceneCanvasConfig,
   SceneConfig,
   SceneObjectConfig,
   SolidBackdropConfig,
@@ -23,10 +24,12 @@ import type {
   Vector3Tuple,
   WorldConfig,
 } from './sceneConfig'
-import { PRIMITIVE_LABELS, SCENE_VERSION } from './sceneConfig'
+import { MATERIAL_KINDS, PRIMITIVE_KINDS, PRIMITIVE_LABELS, SCENE_VERSION } from './sceneConfig'
+import { isAspectRatioKind } from './aspectRatio'
 import {
   DEFAULT_BLOOM,
   DEFAULT_CAMERA,
+  DEFAULT_CANVAS,
   DEFAULT_CHECKER_FLOOR,
   DEFAULT_DPR_CAP,
   DEFAULT_EMISSIVE_COLOR,
@@ -41,7 +44,10 @@ import {
   DEFAULT_OBJECT_MOTION,
   DEFAULT_OBJECT_REACTION,
   DEFAULT_REFLECTIVE_FLOOR,
+  DEFAULT_SEED,
   DEFAULT_SOLID_COLOR,
+  DEFAULT_WIREFRAME_COLOR,
+  DEFAULT_WIREFRAME_EMISSION,
 } from './sceneDefaults'
 import {
   AMBIENT_INTENSITY_RANGE,
@@ -58,6 +64,7 @@ import {
   DPR_CAP_RANGE,
   DRIFT_RANGE,
   EMISSION_RANGE,
+  ENERGY_RANGE,
   EXPAND_RANGE,
   EXPOSURE_RANGE,
   FLARE_RANGE,
@@ -68,6 +75,7 @@ import {
   FLOOR_SIZE_RANGE,
   FOG_FAR_RANGE,
   FOG_NEAR_RANGE,
+  GENERATION_SEQUENCE_RANGE,
   GLOSS_RANGE,
   LIGHT_INTENSITY_RANGE,
   MAX_OBJECT_COUNT,
@@ -77,6 +85,7 @@ import {
   POSITION_RANGE,
   ROTATION_RANGE,
   SCALE_RANGE,
+  SEED_RANGE,
   SPIN_RANGE,
   STRIKE_RANGE,
   clampInteger,
@@ -96,11 +105,27 @@ const MAX_NAME_LENGTH = 40
 const DEFAULT_OBJECT_SEQUENCE_LIMIT = 9_999
 
 function isPrimitiveKind(value: unknown): value is PrimitiveKind {
-  return value === 'torus' || value === 'box' || value === 'icosahedron'
+  return PRIMITIVE_KINDS.some((kind) => kind === value)
 }
 
 function isMaterialKind(value: unknown): value is MaterialKind {
-  return value === 'chrome' || value === 'plastic' || value === 'emissive'
+  return MATERIAL_KINDS.some((kind) => kind === value)
+}
+
+interface MaterialFallback {
+  readonly color: string
+  readonly emission: number
+}
+
+function getMaterialFallback(kind: MaterialKind): MaterialFallback {
+  switch (kind) {
+    case 'emissive':
+      return { color: DEFAULT_EMISSIVE_COLOR, emission: DEFAULT_EMISSIVE_EMISSION }
+    case 'wireframe':
+      return { color: DEFAULT_WIREFRAME_COLOR, emission: DEFAULT_WIREFRAME_EMISSION }
+    default:
+      return { color: DEFAULT_MATERIAL_COLOR, emission: DEFAULT_OBJECT_MATERIAL.emission }
+  }
 }
 
 export function normalizeForm(form: FormConfig): FormConfig {
@@ -121,15 +146,13 @@ export function normalizeTransform(transform: TransformConfig): TransformConfig 
 
 export function normalizeMaterial(material: MaterialConfig): MaterialConfig {
   const kind = isMaterialKind(material.kind) ? material.kind : DEFAULT_OBJECT_MATERIAL.kind
-  const fallbackColor = kind === 'emissive' ? DEFAULT_EMISSIVE_COLOR : DEFAULT_MATERIAL_COLOR
-  const fallbackEmission =
-    kind === 'emissive' ? DEFAULT_EMISSIVE_EMISSION : DEFAULT_OBJECT_MATERIAL.emission
+  const fallback = getMaterialFallback(kind)
 
   return {
     kind,
-    color: sanitizeColor(material.color, fallbackColor),
+    color: sanitizeColor(material.color, fallback.color),
     gloss: clampNumber(material.gloss, GLOSS_RANGE, DEFAULT_OBJECT_MATERIAL.gloss),
-    emission: clampNumber(material.emission, EMISSION_RANGE, fallbackEmission),
+    emission: clampNumber(material.emission, EMISSION_RANGE, fallback.emission),
   }
 }
 
@@ -153,6 +176,7 @@ export function normalizeReaction(reaction: ReactionConfig): ReactionConfig {
     breathe: clampNumber(reaction.breathe, BREATHE_RANGE, DEFAULT_OBJECT_REACTION.breathe),
     strike: clampNumber(reaction.strike, STRIKE_RANGE, DEFAULT_OBJECT_REACTION.strike),
     flare: clampNumber(reaction.flare, FLARE_RANGE, DEFAULT_OBJECT_REACTION.flare),
+    energy: clampNumber(reaction.energy, ENERGY_RANGE, DEFAULT_OBJECT_REACTION.energy),
     drift: clampNumber(reaction.drift, DRIFT_RANGE, DEFAULT_OBJECT_REACTION.drift),
     expand: clampNumber(reaction.expand, EXPAND_RANGE, DEFAULT_OBJECT_REACTION.expand),
   }
@@ -347,19 +371,25 @@ export function normalizeFinish(finish: FinishConfig): FinishConfig {
   }
 }
 
+export function normalizeCanvas(canvas: SceneCanvasConfig): SceneCanvasConfig {
+  return {
+    dprCap: clampNumber(canvas.dprCap, DPR_CAP_RANGE, DEFAULT_DPR_CAP),
+    format: isAspectRatioKind(canvas.format) ? canvas.format : DEFAULT_CANVAS.format,
+  }
+}
+
 /** Returns a fully clamped copy of a scene document. Valid input is preserved. */
 export function normalizeSceneConfig(scene: SceneConfig): SceneConfig {
   return {
     version: SCENE_VERSION,
-    seed: Number.isFinite(scene.seed) ? Math.max(0, Math.trunc(scene.seed)) : 0,
+    seed: clampInteger(scene.seed, SEED_RANGE, DEFAULT_SEED),
     objectSequence: clampInteger(
       scene.objectSequence,
       { minimum: 0, maximum: DEFAULT_OBJECT_SEQUENCE_LIMIT },
       0,
     ),
-    canvas: {
-      dprCap: clampNumber(scene.canvas.dprCap, DPR_CAP_RANGE, DEFAULT_DPR_CAP),
-    },
+    generationSequence: clampInteger(scene.generationSequence, GENERATION_SEQUENCE_RANGE, 0),
+    canvas: normalizeCanvas(scene.canvas),
     objects: normalizeObjectList(scene.objects),
     world: normalizeWorld(scene.world),
     camera: normalizeCamera(scene.camera),

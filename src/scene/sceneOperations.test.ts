@@ -9,9 +9,11 @@ import {
   patchObject,
   removeObject,
   setBackdrop,
+  setCanvasFormat,
   setDprCap,
   setFloor,
   setFog,
+  setSeed,
 } from './sceneOperations'
 import { createBlankScene, createStarterScene } from './starterScene'
 
@@ -30,6 +32,7 @@ describe('scene object operations', () => {
       form: { primitive: 'box' },
       material: { kind: 'emissive', color: '#abcdef', emission: 5 },
       motion: { orbitRadius: 99 },
+      reaction: { energy: 5 },
     })
     const object = scene.objects[0]
 
@@ -39,6 +42,7 @@ describe('scene object operations', () => {
     expect(object.material.color).toBe('#abcdef')
     expect(object.material.emission).toBe(1)
     expect(object.motion.orbitRadius).toBe(6)
+    expect(object.reaction.energy).toBe(1)
   })
 
   it('refuses to add or duplicate beyond the object limit', () => {
@@ -117,7 +121,7 @@ describe('scene object operations', () => {
   it('keeps the composed base transform when only reactions change', () => {
     const scene = createStarterScene()
     const patched = patchObject(scene, 'object-2', {
-      reaction: { drift: 1.5, expand: 2, breathe: 0.2, strike: 0.25, flare: 1 },
+      reaction: { drift: 1.5, expand: 2, breathe: 0.2, strike: 0.25, flare: 1, energy: 0.75 },
     })
 
     expect(patched.objects[1].transform).toEqual(scene.objects[1].transform)
@@ -127,6 +131,7 @@ describe('scene object operations', () => {
       breathe: 0.2,
       strike: 0.25,
       flare: 1,
+      energy: 0.75,
     })
   })
 })
@@ -225,8 +230,21 @@ describe('scene world, camera, and finish operations', () => {
     expect(scene.finish.bloom.enabled).toBe(true)
   })
 
-  it('clamps the canvas DPR cap', () => {
+  it('clamps the canvas DPR cap without dropping the format', () => {
+    const scene = setCanvasFormat(createBlankScene(), '1:1')
+    const clamped = setDprCap(scene, 9)
+
     expect(setDprCap(createBlankScene(), 0.2).canvas.dprCap).toBe(1)
-    expect(setDprCap(createBlankScene(), 9).canvas.dprCap).toBe(3)
+    expect(clamped.canvas.dprCap).toBe(3)
+    expect(clamped.canvas.format).toBe('1:1')
+  })
+
+  it('sets a bounded seed and a canonical aspect format', () => {
+    const scene = createBlankScene()
+
+    expect(setSeed(scene, -5).seed).toBe(0)
+    expect(setSeed(scene, 2_000_000).seed).toBe(999_999)
+    expect(setSeed(scene, Number.NaN).seed).toBe(scene.seed)
+    expect(setCanvasFormat(scene, '9:16').canvas).toEqual({ ...scene.canvas, format: '9:16' })
   })
 })

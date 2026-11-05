@@ -1,15 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import { getCameraPosition } from './camera'
 import { normalizeSceneConfig } from './sceneNormalize'
-import { DEFAULT_CAMERA, DEFAULT_FINISH, DEFAULT_WORLD } from './sceneDefaults'
+import { DEFAULT_CAMERA, DEFAULT_CANVAS, DEFAULT_FINISH, DEFAULT_WORLD } from './sceneDefaults'
 import { createBlankScene, createStarterScene } from './starterScene'
 
 describe('blank scene', () => {
   it('starts with no objects and a valid stage', () => {
     const scene = createBlankScene()
 
-    expect(scene.version).toBe(2)
+    expect(scene.version).toBe(3)
     expect(scene.objectSequence).toBe(0)
+    expect(scene.generationSequence).toBe(0)
+    expect(scene.canvas).toEqual(DEFAULT_CANVAS)
     expect(scene.objects).toHaveLength(0)
     expect(scene.world.floor.type).toBe('reflective')
     expect(scene.world).toEqual(DEFAULT_WORLD)
@@ -39,7 +41,9 @@ describe('starter scene', () => {
     expect(hero.reaction.breathe).toBeGreaterThan(0)
     expect(hero.reaction.strike).toBeGreaterThan(0)
     expect(hero.reaction.flare).toBeGreaterThan(0)
+    expect(hero.reaction.energy).toBeGreaterThan(0)
     expect(satellite.motion.orbitRadius).toBeGreaterThan(0)
+    expect(satellite.reaction.energy).toBeGreaterThan(0)
     expect(satellite.reaction.drift).toBeGreaterThan(0)
     expect(satellite.reaction.expand).toBeGreaterThan(0)
   })
