@@ -33,7 +33,6 @@ import {
   DEFAULT_CHECKER_FLOOR,
   DEFAULT_DPR_CAP,
   DEFAULT_EMISSIVE_COLOR,
-  DEFAULT_EMISSIVE_EMISSION,
   DEFAULT_FINISH,
   DEFAULT_GRADIENT_BACKDROP,
   DEFAULT_LIGHTING,
@@ -47,7 +46,7 @@ import {
   DEFAULT_SEED,
   DEFAULT_SOLID_COLOR,
   DEFAULT_WIREFRAME_COLOR,
-  DEFAULT_WIREFRAME_EMISSION,
+  getMaterialEmissionDefault,
 } from './sceneDefaults'
 import {
   AMBIENT_INTENSITY_RANGE,
@@ -120,11 +119,11 @@ interface MaterialFallback {
 function getMaterialFallback(kind: MaterialKind): MaterialFallback {
   switch (kind) {
     case 'emissive':
-      return { color: DEFAULT_EMISSIVE_COLOR, emission: DEFAULT_EMISSIVE_EMISSION }
+      return { color: DEFAULT_EMISSIVE_COLOR, emission: getMaterialEmissionDefault(kind) }
     case 'wireframe':
-      return { color: DEFAULT_WIREFRAME_COLOR, emission: DEFAULT_WIREFRAME_EMISSION }
+      return { color: DEFAULT_WIREFRAME_COLOR, emission: getMaterialEmissionDefault(kind) }
     default:
-      return { color: DEFAULT_MATERIAL_COLOR, emission: DEFAULT_OBJECT_MATERIAL.emission }
+      return { color: DEFAULT_MATERIAL_COLOR, emission: getMaterialEmissionDefault(kind) }
   }
 }
 

@@ -5,6 +5,7 @@ import {
   DEFAULT_CANVAS,
   DEFAULT_CHECKER_FLOOR,
   DEFAULT_DPR_CAP,
+  DEFAULT_EMISSIVE_EMISSION,
   DEFAULT_FINISH,
   DEFAULT_LIGHTING,
   DEFAULT_LINEAR_FOG,
@@ -14,6 +15,8 @@ import {
   DEFAULT_OBJECT_REACTION,
   DEFAULT_REFLECTIVE_FLOOR,
   DEFAULT_SEED,
+  DEFAULT_WIREFRAME_EMISSION,
+  getMaterialEmissionDefault,
 } from './sceneDefaults'
 import {
   AMBIENT_INTENSITY_RANGE,
@@ -108,5 +111,13 @@ describe('canonical scene defaults', () => {
 
   it('shares the canonical canvas default', () => {
     expect(DEFAULT_CANVAS).toEqual({ dprCap: DEFAULT_DPR_CAP, format: '16:9' })
+  })
+
+  it('uses the canonical emission default for each material kind', () => {
+    expect(getMaterialEmissionDefault('emissive')).toBe(DEFAULT_EMISSIVE_EMISSION)
+    expect(getMaterialEmissionDefault('wireframe')).toBe(DEFAULT_WIREFRAME_EMISSION)
+    expect(getMaterialEmissionDefault('chrome')).toBe(DEFAULT_OBJECT_MATERIAL.emission)
+    expect(getMaterialEmissionDefault('plastic')).toBe(DEFAULT_OBJECT_MATERIAL.emission)
+    expect(getMaterialEmissionDefault('matte')).toBe(DEFAULT_OBJECT_MATERIAL.emission)
   })
 })

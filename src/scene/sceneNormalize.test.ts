@@ -10,6 +10,8 @@ import {
   DEFAULT_OBJECT_MATERIAL,
   DEFAULT_OBJECT_MOTION,
   DEFAULT_OBJECT_REACTION,
+  DEFAULT_WIREFRAME_COLOR,
+  DEFAULT_WIREFRAME_EMISSION,
 } from './sceneDefaults'
 import { normalizeObjectConfig, normalizeSceneConfig } from './sceneNormalize'
 import type { SceneConfig, SceneObjectConfig } from './sceneConfig'
@@ -97,6 +99,21 @@ describe('scene normalization', () => {
       })
       expect(object.material.kind).toBe(kind)
     }
+  })
+
+  it('uses canonical wireframe fallbacks for invalid color and emission', () => {
+    const object = normalizeObjectConfig({
+      ...createObjectConfig(1),
+      material: {
+        ...DEFAULT_OBJECT_MATERIAL,
+        kind: 'wireframe',
+        color: 'not-a-color',
+        emission: Number.NaN,
+      },
+    })
+
+    expect(object.material.color).toBe(DEFAULT_WIREFRAME_COLOR)
+    expect(object.material.emission).toBe(DEFAULT_WIREFRAME_EMISSION)
   })
 
   it('keeps object ids unique and caps the object count', () => {

@@ -35,15 +35,15 @@ export function WelcomeIntro() {
   return (
     <>
       <section className="milestone" aria-labelledby="welcome-intro-title">
-        <p className="milestone__status">Milestone 2 · Blank scene editor</p>
+        <p className="milestone__status">Milestone 3 · Expanded library</p>
         <h2 id="welcome-intro-title">Compose first. React second.</h2>
         <p>
           Every object holds a composed resting pose. Loudness, transients, and stereo add bounded
           energy without replacing what you authored.
         </p>
         <ul className="welcome-list">
-          <li>Torus, box, or icosahedron.</li>
-          <li>Chrome, glossy plastic, or emissive surfaces.</li>
+          <li>Torus, torus knot, box, icosphere, cone, or cylinder.</li>
+          <li>Chrome, glossy plastic, matte, emissive, or wireframe surfaces.</li>
           <li>Reflective or checkerboard floors, fog, and selective bloom.</li>
         </ul>
       </section>

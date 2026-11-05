@@ -335,7 +335,7 @@ Selected modules should be ported into this project; no shared package or monore
 
 ## 10. Milestones
 
-The project scaffold and documentation are initialized. **Milestones 1 and 2 are implemented and verified.** Milestone 3 is next. All behavior checkboxes below remain unchecked until implemented and verified.
+The project scaffold and documentation are initialized. **Milestones 1 and 2 are implemented and verified.** Milestone 3 is in progress. All behavior checkboxes below remain unchecked until implemented and verified.
 
 ### Milestone 1 — Fixed Visual Study and Capture Spike
 

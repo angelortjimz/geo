@@ -1,4 +1,11 @@
 import type { MaterialKind, PrimitiveKind, SceneObjectConfig } from '../../scene/sceneConfig'
+import {
+  MATERIAL_KINDS,
+  MATERIAL_LABELS,
+  PRIMITIVE_KINDS,
+  PRIMITIVE_LABELS,
+} from '../../scene/sceneConfig'
+import { getMaterialEmissionDefault } from '../../scene/sceneDefaults'
 import type { ObjectPatch } from '../../scene/sceneOperations'
 import {
   BREATHE_RANGE,
@@ -22,17 +29,13 @@ import {
 import { ColorField, SelectField, SliderField, ToggleField, Vector3Field } from './fields'
 import { formatPercent, formatRadiansPerSecond } from './formatters'
 
-const PRIMITIVE_OPTIONS: readonly { value: PrimitiveKind; label: string }[] = [
-  { value: 'torus', label: 'Torus' },
-  { value: 'box', label: 'Box' },
-  { value: 'icosahedron', label: 'Icosahedron' },
-]
+const PRIMITIVE_OPTIONS: readonly { value: PrimitiveKind; label: string }[] = PRIMITIVE_KINDS.map(
+  (value) => ({ value, label: PRIMITIVE_LABELS[value] }),
+)
 
-const MATERIAL_OPTIONS: readonly { value: MaterialKind; label: string }[] = [
-  { value: 'chrome', label: 'Chrome' },
-  { value: 'plastic', label: 'Glossy plastic' },
-  { value: 'emissive', label: 'Emissive' },
-]
+const MATERIAL_OPTIONS: readonly { value: MaterialKind; label: string }[] = MATERIAL_KINDS.map(
+  (value) => ({ value, label: MATERIAL_LABELS[value] }),
+)
 
 interface ObjectPanelProps {
   object: SceneObjectConfig | null
@@ -52,6 +55,9 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
     )
   }
 
+  const supportsEmission =
+    object.material.kind === 'emissive' || object.material.kind === 'wireframe'
+
   return (
     <fieldset className="inspector-fields" disabled={locked}>
       <legend className="sr-only">Object properties</legend>
@@ -67,7 +73,7 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
           />
           {object.form.primitive === 'box' ? (
             <p className="field-hint">
-              A box keeps one quad per face; detail applies to the torus and icosahedron.
+              A box keeps one quad per face; detail applies to the other primitives.
             </p>
           ) : (
             <SliderField
@@ -119,16 +125,17 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
             label="Material"
             value={object.material.kind}
             options={MATERIAL_OPTIONS}
-            onChange={(kind) =>
+            onChange={(kind) => {
+              const defaultEmission = getMaterialEmissionDefault(kind)
               onPatch({
                 material: {
                   kind,
-                  ...(kind === 'emissive' && object.material.emission === 0
-                    ? { emission: 0.6 }
+                  ...(defaultEmission > 0 && object.material.emission === 0
+                    ? { emission: defaultEmission }
                     : {}),
                 },
               })
-            }
+            }}
           />
           <ColorField
             label="Color"
@@ -142,7 +149,7 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
             step={0.01}
             onChange={(gloss) => onPatch({ material: { gloss } })}
           />
-          {object.material.kind === 'emissive' && (
+          {supportsEmission && (
             <SliderField
               label="Emission"
               value={object.material.emission}
@@ -150,6 +157,11 @@ export function ObjectPanel({ object, locked, onPatch }: ObjectPanelProps) {
               step={0.01}
               onChange={(emission) => onPatch({ material: { emission } })}
             />
+          )}
+          {object.material.kind === 'wireframe' && (
+            <p className="field-hint">
+              Emission adds a bloom-visible glow. Set it to zero for unlit lines.
+            </p>
           )}
         </section>
 

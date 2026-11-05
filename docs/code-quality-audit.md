@@ -120,7 +120,7 @@ single-sourced immediately, generic one-line utilities wait for a third use.
 
 - `pnpm typecheck`
 - `pnpm lint`
-- `pnpm test` (90 tests)
+- `pnpm test` (99 tests)
 - `pnpm build`
 
 ## Manual checks still required
@@ -132,3 +132,5 @@ single-sourced immediately, generic one-line utilities wait for a third use.
 - Verify capture completion, cancellation, and failure cleanup in the browser.
 - Run one development Strict Mode pass to confirm there is no duplicate renderer, animation
   loop, or audio graph.
+- Verify all six primitives and five materials, including matte shading and wireframe bloom,
+  across the blank and starter scenes in desktop Chromium.

@@ -8,6 +8,7 @@ import type {
   LightingConfig,
   LinearFogConfig,
   MaterialConfig,
+  MaterialKind,
   MotionConfig,
   ReactionConfig,
   ReflectiveFloorConfig,
@@ -28,7 +29,7 @@ export const DEFAULT_MATERIAL_COLOR = '#e4edf2'
 export const DEFAULT_EMISSIVE_COLOR = '#b7f5ff'
 export const DEFAULT_EMISSIVE_EMISSION = 0.5
 export const DEFAULT_WIREFRAME_COLOR = '#b7f5ff'
-export const DEFAULT_WIREFRAME_EMISSION = 0.35
+export const DEFAULT_WIREFRAME_EMISSION = 0.5
 
 export const DEFAULT_OBJECT_FORM: FormConfig = {
   primitive: 'torus',
@@ -41,6 +42,18 @@ export const DEFAULT_OBJECT_MATERIAL: MaterialConfig = {
   color: DEFAULT_MATERIAL_COLOR,
   gloss: 0.84,
   emission: 0,
+}
+
+/** Default emission when a material kind starts using it. */
+export function getMaterialEmissionDefault(kind: MaterialKind): number {
+  switch (kind) {
+    case 'emissive':
+      return DEFAULT_EMISSIVE_EMISSION
+    case 'wireframe':
+      return DEFAULT_WIREFRAME_EMISSION
+    default:
+      return DEFAULT_OBJECT_MATERIAL.emission
+  }
 }
 
 export const DEFAULT_OBJECT_MOTION: MotionConfig = {

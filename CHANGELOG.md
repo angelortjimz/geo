@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Four accessible inspector views for object form, transform, surface, motion, and reaction; world backdrop, floor, fog, lighting, and camera; and finish exposure and bloom.
 - Live canvas camera navigation: drag to orbit, wheel to zoom, with the same spherical camera values exposed as keyboard-accessible World controls.
 - Three primitives (torus, box, icosahedron), three surfaces (chrome, glossy plastic, emissive), solid and gradient backdrops, none/reflective/checkerboard floors, fog, lighting, contact shadows, and selective emissive bloom.
+- Six primitives (torus, torus knot, box, icosphere, cone, cylinder) and five surfaces (chrome, glossy plastic, matte, emissive, wireframe), with inspector options, box-specific detail handling, emission controls, and selective bloom for glowing wireframes.
 
 ### Changed
 

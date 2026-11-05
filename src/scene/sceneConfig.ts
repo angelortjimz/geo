@@ -26,7 +26,7 @@ export const PRIMITIVE_LABELS: Record<PrimitiveKind, string> = {
   torus: 'Torus',
   torusKnot: 'Torus knot',
   box: 'Box',
-  icosahedron: 'Icosahedron',
+  icosahedron: 'Icosphere',
   cone: 'Cone',
   cylinder: 'Cylinder',
 }

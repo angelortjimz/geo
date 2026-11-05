@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { FormConfig, MaterialConfig } from '../scene/sceneConfig'
+import { MATERIAL_KINDS, PRIMITIVE_KINDS } from '../scene/sceneConfig'
 import {
   createObjectMaterial,
   createPrimitiveGeometry,
@@ -45,6 +46,24 @@ describe('object factory', () => {
       )
       low.dispose()
       high.dispose()
+    }
+  })
+
+  it('builds every canonical primitive and material kind', () => {
+    for (const primitive of PRIMITIVE_KINDS) {
+      const geometry = createPrimitiveGeometry({ primitive, detail: 2, flatShading: false })
+      expect(geometry.getAttribute('position').count).toBeGreaterThan(0)
+      geometry.dispose()
+    }
+
+    for (const kind of MATERIAL_KINDS) {
+      const material = createObjectMaterial(SMOOTH_TORUS, {
+        ...CHROME,
+        kind,
+        emission: kind === 'emissive' || kind === 'wireframe' ? 0.5 : 0,
+      })
+      expect(material.wireframe).toBe(kind === 'wireframe')
+      material.dispose()
     }
   })
 
@@ -100,6 +119,8 @@ describe('object factory', () => {
     expect(shouldMaterialBloom(glowingWireframe)).toBe(true)
     expect(shouldMaterialBloom(darkWireframe)).toBe(false)
     expect(shouldMaterialBloom(CHROME)).toBe(false)
+    expect(shouldMaterialBloom({ ...emissive, kind: 'plastic', emission: 0 })).toBe(false)
+    expect(shouldMaterialBloom({ ...emissive, kind: 'matte', emission: 0 })).toBe(false)
   })
 
   it('rebuilds geometry only for primitive or detail changes', () => {

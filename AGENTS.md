@@ -4,7 +4,7 @@ geo is a client-only, audio-played early-CGI scene composer. Users build sparse,
 
 Read `docs/roadmap.md` before changing scope. Implement only the current milestone unless the user explicitly requests otherwise.
 
-Current status: Milestone 1 (fixed visual study and five-second WebGL capture spike) and Milestone 2 (blank scene editor) are implemented and verified. Milestone 3, creative and performance polish, is next. Full-track export, the full primitive/material library, generation, and release hardening remain later milestones.
+Current status: Milestone 1 (fixed visual study and five-second WebGL capture spike) and Milestone 2 (blank scene editor) are implemented and verified. Milestone 3, creative and performance polish, is in progress; the six-primitive and five-material library is implemented in the inspector and renderer. Seeded generation, fullscreen and aspect controls, broader behavior tuning, profiling, and release hardening remain. Full-track export remains Milestone 4.
 
 Do not add full-export, generation, fullscreen/aspect-format, or polish scope until the corresponding milestone is authorized.
 

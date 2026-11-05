@@ -4,7 +4,7 @@ geo is a client-only, audio-played early-CGI scene composer. It combines sparse 
 
 The artwork is the scene—not a spectrum analyzer. The composition remains intentional during silence, while music adds breathing, springy impacts, and movement through stereo space.
 
-> **Current status:** Milestone 2, the blank scene editor, is implemented and verified in Chromium. The full primitive/material library (Milestone 3) and full-track export (Milestone 4) are not implemented yet. See [`docs/roadmap.md`](docs/roadmap.md) for the approved plan.
+> **Current status:** Milestone 2, the blank scene editor, is implemented and verified in Chromium. Milestone 3 is in progress: the six-primitive and five-material library is implemented in the editor. Seeded generation, fullscreen and aspect controls, broader behavior tuning, and full-track export remain pending. See [`docs/roadmap.md`](docs/roadmap.md) for the approved plan.
 
 ## Requirements
 
@@ -43,7 +43,7 @@ The workspace opens with a blank stage and a welcome overlay offering **Start bl
 The session holds up to 12 objects with stable identities and generated names. The inspector has four views:
 
 - **Scene:** select, add, duplicate, and remove objects, and replace the session with a blank or starter scene. Replacement asks for inline confirmation when edits would be lost.
-- **Object:** torus, box, or icosahedron; detail and flat shading; position, rotation, and scale; chrome, glossy plastic, or emissive surfaces; spin, float, orbit, and phase; and per-object loudness, transient, and stereo reactions.
+- **Object:** torus, torus knot, box, icosphere, cone, or cylinder; detail and flat shading; position, rotation, and scale; chrome, glossy plastic, matte, emissive, or wireframe surfaces, with emission for emissive and wireframe; spin, float, orbit, and phase; and per-object loudness, transient, and stereo reactions.
 - **World:** solid or gradient backdrop; none, reflective, or checkerboard floor; fog; ambient, key, and fill lighting; and the spherical camera.
 - **Finish:** exposure and selective bloom.
 
@@ -79,7 +79,8 @@ The renderer, audio graph, animation frames, event subscriptions, recording stre
 
 ## Current limitations
 
-- The library is intentionally limited to three primitives (torus, box, icosahedron) and three materials (chrome, glossy plastic, emissive), matching Milestone 2. The complete library, seeded generation, viewport picking, transform gizmos, fullscreen preview, and aspect-format controls belong to later milestones.
+- Milestone 3 remains in progress. Seeded generation, selected-object mutation, viewport picking, transform gizmos, fullscreen preview, and aspect-format controls are not implemented yet.
+- The expanded six-primitive and five-material library still needs browser visual verification across representative compositions; automated rendering and normalization tests pass.
 - Capture is a five-second technical spike, not the full-track exporter. It captures in real time from the current playhead and always stops after five seconds.
 - MP4 recording depends on desktop Chromium's `MediaRecorder`, WebGL canvas capture, and H.264/AAC codec support. Other browsers and very slow software-only GPU rendering are not verified capture targets and may drop video frames.
 - Scene state is session-local. There is no autosave, project file, account, backend, or persistence.
@@ -96,7 +97,7 @@ Local audio
                    └ analysis-only splitter → left/right analysers
     → level / intensity / impact / balance / width
     → envelopes, spring, and bounded scene behaviors
-    → Three.js scene and selective emissive bloom
+    → Three.js scene and selective emissive and wireframe bloom
     → WebGL canvas → optional five-second capture bridge
 ```
 

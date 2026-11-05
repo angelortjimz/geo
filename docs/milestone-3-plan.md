@@ -1,6 +1,6 @@
 # Milestone 3 — Creative and Performance Polish Implementation Plan
 
-> **Status:** Step 1 (scene document foundation) is implemented. Expanding the primitive and material kinds also required the renderer-side geometry and material cases, so the renderer half of Step 2 is in place. Inspector exposure, generation, aspect UI, fullscreen, tuning, and final verification remain pending. Automated checks pass for the Step 1 scope.
+> **Status:** Steps 1 and 2 (scene document foundation, six primitives, and five materials) are implemented. Browser visual tuning and manual verification of the expanded library remain, as do generation, aspect UI, fullscreen, broader behavior tuning, and profiling. Automated checks pass for the completed steps.
 
 This plan implements only the Milestone 3 checklist in [`roadmap.md`](roadmap.md). Full-track export, the resolution matrix, persistence, timeline/keyframes, viewport picking, transform gizmos, orthographic camera, and the perspective-grid world mode remain out of scope.
 
@@ -56,14 +56,14 @@ Tests cover version 3, new enum values, seed and generation-sequence clamping, i
 
 ## Step 2 — Six primitives and five materials
 
-The renderer half of this step landed with Step 1 because the expanded unions must stay exhaustive. Remaining work is inspector exposure and visual tuning.
+The renderer half of this step landed with Step 1 because the expanded unions must stay exhaustive. Inspector exposure landed in Step 2.
 
 - ~~Add cone, cylinder, and torus-knot geometry to `src/render/objectFactory.ts`.~~
 - ~~Add matte and wireframe material presets.~~
 - ~~Make wireframe participate in selective bloom when it has emission.~~
-- Update the Object inspector options, detail hint, and emission controls.
-- Keep geometry keyed by primitive and detail; keep material changes in place.
-- Tune the new presets against the starter scene and representative compositions.
+- ~~Update the Object inspector options, detail hint, and emission controls.~~
+- ~~Keep geometry keyed by primitive and detail; keep material changes in place.~~
+- Tune the new presets against the starter scene and representative compositions in the browser.
 
 Tests cover every primitive, detail escalation, matte values, wireframe flag, and material-key stability.
 
