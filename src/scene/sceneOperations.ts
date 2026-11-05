@@ -16,6 +16,12 @@ import type {
   TransformConfig,
   Vector3Tuple,
 } from './sceneConfig'
+import {
+  DEFAULT_OBJECT_FORM,
+  DEFAULT_OBJECT_MATERIAL,
+  DEFAULT_OBJECT_MOTION,
+  DEFAULT_OBJECT_REACTION,
+} from './sceneDefaults'
 import { MAX_OBJECT_COUNT, clampNumber, DPR_CAP_RANGE } from './sceneLimits'
 import {
   normalizeBackdrop,
@@ -67,38 +73,16 @@ function getCreationPosition(sequence: number): Vector3Tuple {
 export function createObjectConfig(sequence: number): SceneObjectConfig {
   return {
     id: `object-${sequence}`,
-    name: `${PRIMITIVE_LABELS.torus} ${sequence}`,
-    form: {
-      primitive: 'torus',
-      detail: 3,
-      flatShading: false,
-    },
+    name: `${PRIMITIVE_LABELS[DEFAULT_OBJECT_FORM.primitive]} ${sequence}`,
+    form: { ...DEFAULT_OBJECT_FORM },
     transform: {
       position: getCreationPosition(sequence),
       rotation: [0, 0, 0],
       scale: [1, 1, 1],
     },
-    material: {
-      kind: 'chrome',
-      color: '#e4edf2',
-      gloss: 0.84,
-      emission: 0,
-    },
-    motion: {
-      spin: 0.12,
-      float: 0.06,
-      floatSpeed: 0.6,
-      orbitRadius: 0,
-      orbitSpeed: 0.2,
-      phase: 0,
-    },
-    reaction: {
-      breathe: 0.06,
-      strike: 0.14,
-      flare: 0.35,
-      drift: 0,
-      expand: 0,
-    },
+    material: { ...DEFAULT_OBJECT_MATERIAL },
+    motion: { ...DEFAULT_OBJECT_MOTION },
+    reaction: { ...DEFAULT_OBJECT_REACTION },
   }
 }
 
@@ -136,15 +120,11 @@ export function addObject(scene: SceneConfig, draft: ObjectPatch = {}): SceneCon
 
   const sequence = scene.objectSequence + 1
   const object = applyObjectPatch(createObjectConfig(sequence), draft)
-  const named: SceneObjectConfig = {
-    ...object,
-    name: `${PRIMITIVE_LABELS[object.form.primitive]} ${sequence}`,
-  }
 
   return {
     ...scene,
     objectSequence: sequence,
-    objects: [...scene.objects, named],
+    objects: [...scene.objects, object],
   }
 }
 

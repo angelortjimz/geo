@@ -3,9 +3,13 @@ import type {
   CameraConfig,
   CheckerFloorConfig,
   FinishConfig,
+  FormConfig,
   GradientBackdropConfig,
   LightingConfig,
   LinearFogConfig,
+  MaterialConfig,
+  MotionConfig,
+  ReactionConfig,
   ReflectiveFloorConfig,
   WorldConfig,
 } from './sceneConfig'
@@ -13,6 +17,40 @@ import type {
 /** Stable seed shared by the blank and starter scenes. */
 export const DEFAULT_SEED = 0x1994
 export const DEFAULT_DPR_CAP = 2
+
+export const DEFAULT_MATERIAL_COLOR = '#e4edf2'
+export const DEFAULT_EMISSIVE_COLOR = '#b7f5ff'
+export const DEFAULT_EMISSIVE_EMISSION = 0.5
+
+export const DEFAULT_OBJECT_FORM: FormConfig = {
+  primitive: 'torus',
+  detail: 3,
+  flatShading: false,
+}
+
+export const DEFAULT_OBJECT_MATERIAL: MaterialConfig = {
+  kind: 'chrome',
+  color: DEFAULT_MATERIAL_COLOR,
+  gloss: 0.84,
+  emission: 0,
+}
+
+export const DEFAULT_OBJECT_MOTION: MotionConfig = {
+  spin: 0.12,
+  float: 0.06,
+  floatSpeed: 0.6,
+  orbitRadius: 0,
+  orbitSpeed: 0.2,
+  phase: 0,
+}
+
+export const DEFAULT_OBJECT_REACTION: ReactionConfig = {
+  breathe: 0.06,
+  strike: 0.14,
+  flare: 0.35,
+  drift: 0,
+  expand: 0,
+}
 
 export const DEFAULT_SOLID_COLOR = '#cfd6d6'
 

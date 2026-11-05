@@ -17,6 +17,7 @@ import {
 } from '../../scene/sceneDefaults'
 import {
   AMBIENT_INTENSITY_RANGE,
+  CAMERA_AZIMUTH_RANGE,
   CAMERA_DRIFT_RANGE,
   CAMERA_DISTANCE_RANGE,
   CAMERA_ELEVATION_RANGE,
@@ -47,8 +48,6 @@ const FOG_OPTIONS: readonly { value: FogKind; label: string }[] = [
   { value: 'none', label: 'None' },
   { value: 'linear', label: 'Linear' },
 ]
-
-const AZIMUTH_RANGE = { minimum: -180, maximum: 180 } as const
 
 type ActiveFloorConfig = Exclude<FloorConfig, { readonly type: 'none' }>
 
@@ -338,7 +337,7 @@ export function WorldPanel({
           <SliderField
             label="Azimuth"
             value={camera.azimuth}
-            range={AZIMUTH_RANGE}
+            range={CAMERA_AZIMUTH_RANGE}
             step={1}
             format={formatDegrees}
             onChange={(azimuth) => onPatchCamera({ azimuth })}

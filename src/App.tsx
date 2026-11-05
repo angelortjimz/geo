@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import type { AudioSnapshot } from './audio/AudioEngine'
 import { useAudioEngine } from './audio/useAudioEngine'
 import { AudioUpload } from './components/AudioUpload'
 import { CaptureControl } from './components/CaptureControl'
@@ -8,7 +9,41 @@ import { SceneCanvas } from './components/SceneCanvas'
 import { WelcomeIntro, WelcomeOverlay } from './components/Welcome'
 import { useSceneEditor } from './editor/useSceneEditor'
 import type { SceneCaptureHandle } from './export/captureTypes'
+import type { CaptureSnapshot } from './export/captureSpike'
 import { useCaptureSpike } from './export/useCaptureSpike'
+
+function getTransportMessage(
+  audio: AudioSnapshot,
+  capture: CaptureSnapshot,
+  isWelcome: boolean,
+): string | null {
+  if (audio.error) {
+    return audio.error
+  }
+  if (capture.error) {
+    return capture.error
+  }
+
+  switch (capture.status) {
+    case 'recording':
+      return 'Recording the scene…'
+    case 'finalizing':
+      return 'Finalizing MP4…'
+    case 'complete':
+      return `Saved ${capture.fileName}`
+    default:
+      break
+  }
+
+  if (isWelcome) {
+    return 'Choose a blank or starter scene to begin.'
+  }
+  if (audio.status === 'idle') {
+    return 'Drop audio anywhere to begin'
+  }
+
+  return null
+}
 
 export default function App() {
   const { engine, snapshot } = useAudioEngine()
@@ -20,6 +55,8 @@ export default function App() {
   const captureActive = ['preparing', 'recording', 'finalizing'].includes(captureSnapshot.status)
   const trackReady = ['ready', 'playing', 'paused', 'ended'].includes(snapshot.status)
   const isWelcome = editor.mode === 'welcome'
+  const feedbackMessage = getTransportMessage(snapshot, captureSnapshot, isWelcome)
+  const hasFeedbackError = Boolean(snapshot.error || captureSnapshot.error)
 
   const loadFile = (file: File) => {
     if (captureActive) {
@@ -118,22 +155,10 @@ export default function App() {
         <div className="transport-feedback">
           <span>Local audio · no upload · session only</span>
           <span
-            className={snapshot.error || captureSnapshot.error ? 'transport-error' : undefined}
-            role={snapshot.error || captureSnapshot.error ? 'alert' : 'status'}
+            className={hasFeedbackError ? 'transport-error' : undefined}
+            role={hasFeedbackError ? 'alert' : 'status'}
           >
-            {snapshot.error ??
-              captureSnapshot.error ??
-              (captureSnapshot.status === 'recording'
-                ? 'Recording the scene…'
-                : captureSnapshot.status === 'finalizing'
-                  ? 'Finalizing MP4…'
-                  : captureSnapshot.status === 'complete'
-                    ? `Saved ${captureSnapshot.fileName}`
-                    : isWelcome
-                      ? 'Choose a blank or starter scene to begin.'
-                      : snapshot.status === 'idle'
-                        ? 'Drop audio anywhere to begin'
-                        : null)}
+            {feedbackMessage}
           </span>
         </div>
       </footer>

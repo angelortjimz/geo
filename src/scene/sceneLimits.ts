@@ -44,6 +44,7 @@ export const BLOOM_STRENGTH_RANGE: NumericRange = { minimum: 0, maximum: 2 }
 export const BLOOM_RADIUS_RANGE: NumericRange = { minimum: 0, maximum: 1 }
 
 export const CAMERA_TARGET_RANGE: NumericRange = { minimum: -12, maximum: 12 }
+export const CAMERA_AZIMUTH_RANGE: NumericRange = { minimum: -180, maximum: 180 }
 export const CAMERA_DISTANCE_RANGE: NumericRange = { minimum: 2, maximum: 30 }
 export const CAMERA_ELEVATION_RANGE: NumericRange = { minimum: -85, maximum: 85 }
 export const CAMERA_FOV_RANGE: NumericRange = { minimum: 20, maximum: 75 }

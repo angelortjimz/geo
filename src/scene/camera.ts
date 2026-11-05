@@ -1,4 +1,5 @@
 import type { CameraConfig, Vector3Tuple } from './sceneConfig'
+import { DEFAULT_CAMERA } from './sceneDefaults'
 import {
   CAMERA_DISTANCE_RANGE,
   CAMERA_ELEVATION_RANGE,
@@ -7,14 +8,12 @@ import {
 } from './sceneLimits'
 
 const DEGREES_TO_RADIANS = Math.PI / 180
-const DEFAULT_DISTANCE = 11.6
-const DEFAULT_ELEVATION = 18
 
 /** Pointer drag sensitivity in degrees per CSS pixel. */
-export const AZIMUTH_DEGREES_PER_PIXEL = 0.28
-export const ELEVATION_DEGREES_PER_PIXEL = 0.24
+const AZIMUTH_DEGREES_PER_PIXEL = 0.28
+const ELEVATION_DEGREES_PER_PIXEL = 0.24
 /** Wheel zoom sensitivity; positive deltas move the camera away from the target. */
-export const ZOOM_PER_WHEEL_UNIT = 0.0015
+const ZOOM_PER_WHEEL_UNIT = 0.0015
 
 export interface CameraNavigationPatch {
   readonly azimuth?: number
@@ -24,8 +23,8 @@ export interface CameraNavigationPatch {
 
 /** Places the camera on its authored spherical orbit around the target. */
 export function getCameraPosition(camera: CameraConfig): Vector3Tuple {
-  const distance = clampNumber(camera.distance, CAMERA_DISTANCE_RANGE, DEFAULT_DISTANCE)
-  const elevation = clampNumber(camera.elevation, CAMERA_ELEVATION_RANGE, DEFAULT_ELEVATION)
+  const distance = clampNumber(camera.distance, CAMERA_DISTANCE_RANGE, DEFAULT_CAMERA.distance)
+  const elevation = clampNumber(camera.elevation, CAMERA_ELEVATION_RANGE, DEFAULT_CAMERA.elevation)
   const azimuthRadians = normalizeDegrees(camera.azimuth) * DEGREES_TO_RADIANS
   const elevationRadians = elevation * DEGREES_TO_RADIANS
   const horizontalDistance = Math.cos(elevationRadians) * distance
@@ -51,7 +50,7 @@ export function applyCameraDrag(
     elevation: clampNumber(
       camera.elevation - safeDeltaY * ELEVATION_DEGREES_PER_PIXEL,
       CAMERA_ELEVATION_RANGE,
-      DEFAULT_ELEVATION,
+      DEFAULT_CAMERA.elevation,
     ),
   }
 }
@@ -62,6 +61,6 @@ export function applyCameraZoom(camera: CameraConfig, wheelDelta: number): Camer
   const distance = camera.distance * Math.exp(safeWheelDelta * ZOOM_PER_WHEEL_UNIT)
 
   return {
-    distance: clampNumber(distance, CAMERA_DISTANCE_RANGE, DEFAULT_DISTANCE),
+    distance: clampNumber(distance, CAMERA_DISTANCE_RANGE, DEFAULT_CAMERA.distance),
   }
 }

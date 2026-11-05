@@ -370,16 +370,11 @@ export class SceneRenderer {
 
   resetMotion(): void {
     this.clock = 0
-    this.smoothedBalance = 0
-    this.smoothedWidth = 0
     this.lastTime = 0
     this.audioRevision = this.engine.getAnalysisRevision()
-    this.extractor.reset()
+    this.resetTransientSignals()
 
     for (const runtime of this.objects.values()) {
-      runtime.spring.reset()
-      runtime.flare = 0
-      runtime.previousImpact = 0
       runtime.orbitAngle = runtime.config.motion.phase * ORBIT_RADIANS
       runtime.spinAngle = 0
     }
@@ -485,9 +480,13 @@ export class SceneRenderer {
     }
 
     this.audioRevision = revision
-    this.extractor.reset()
+    this.resetTransientSignals()
+  }
+
+  private resetTransientSignals(): void {
     this.smoothedBalance = 0
     this.smoothedWidth = 0
+    this.extractor.reset()
 
     for (const runtime of this.objects.values()) {
       runtime.spring.reset()
@@ -715,7 +714,7 @@ export class SceneRenderer {
 
   private syncWorld(world: WorldConfig): void {
     this.syncBackdrop(world.backdrop)
-    this.syncFloor(world)
+    this.syncFloor(world.floor, getBackdropHorizonColor(world.backdrop))
     this.syncFog(world.fog)
     this.syncLighting(world.lighting)
   }
@@ -743,9 +742,7 @@ export class SceneRenderer {
     }
   }
 
-  private syncFloor(world: WorldConfig): void {
-    const floor = world.floor
-
+  private syncFloor(floor: FloorConfig, horizonColor: string): void {
     if (floor.type === 'none') {
       if (this.floor) {
         this.disposeFloor(this.floor)
@@ -754,7 +751,6 @@ export class SceneRenderer {
       return
     }
 
-    const horizonColor = getBackdropHorizonColor(world.backdrop)
     if (this.floor && this.floor.kind === floor.type) {
       this.updateFloor(this.floor, floor, horizonColor)
       return
@@ -780,17 +776,15 @@ export class SceneRenderer {
         multisample: 0,
         shader,
       })
-      reflector.rotation.x = -Math.PI / 2
-      reflector.position.y = 0
-      reflector.scale.set(floor.size, floor.size, 1)
-      this.scene.add(reflector)
 
       const material = reflector.material
       if (!(material instanceof ShaderMaterial)) {
+        reflector.geometry.dispose()
         reflector.dispose()
         throw new Error('The reflective floor did not create a shader material.')
       }
 
+      this.addFloorMesh(reflector, floor.size)
       return { kind: 'reflective', mesh: reflector, material, reflector }
     }
 
@@ -802,31 +796,32 @@ export class SceneRenderer {
       fragmentShader: shader.fragmentShader,
     })
     const mesh = new Mesh(new PlaneGeometry(1, 1), material)
-    mesh.rotation.x = -Math.PI / 2
-    mesh.position.y = 0
-    mesh.scale.set(floor.size, floor.size, 1)
-    this.scene.add(mesh)
+    this.addFloorMesh(mesh, floor.size)
 
     return { kind: 'checker', mesh, material, reflector: null }
   }
 
+  private addFloorMesh(mesh: Mesh, size: number): void {
+    mesh.rotation.x = -Math.PI / 2
+    mesh.position.y = 0
+    mesh.scale.set(size, size, 1)
+    this.scene.add(mesh)
+  }
+
   private updateFloor(runtime: FloorRuntime, floor: ActiveFloorConfig, horizonColor: string): void {
+    runtime.mesh.scale.set(floor.size, floor.size, 1)
+    setColorUniform(runtime.material, 'horizonColor', horizonColor)
+    setNumberUniform(runtime.material, 'fadeStart', floor.fadeStart)
+    setNumberUniform(runtime.material, 'fadeEnd', floor.fadeEnd)
+
     if (runtime.kind === 'reflective' && floor.type === 'reflective') {
-      runtime.mesh.scale.set(floor.size, floor.size, 1)
       setColorUniform(runtime.material, 'color', floor.color)
-      setColorUniform(runtime.material, 'horizonColor', horizonColor)
-      setNumberUniform(runtime.material, 'fadeStart', floor.fadeStart)
-      setNumberUniform(runtime.material, 'fadeEnd', floor.fadeEnd)
       return
     }
 
     if (runtime.kind === 'checker' && floor.type === 'checker') {
-      runtime.mesh.scale.set(floor.size, floor.size, 1)
       setColorUniform(runtime.material, 'lightColor', floor.lightColor)
       setColorUniform(runtime.material, 'darkColor', floor.darkColor)
-      setColorUniform(runtime.material, 'horizonColor', horizonColor)
-      setNumberUniform(runtime.material, 'fadeStart', floor.fadeStart)
-      setNumberUniform(runtime.material, 'fadeEnd', floor.fadeEnd)
     }
   }
 

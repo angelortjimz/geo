@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { createObjectConfig } from './sceneOperations'
 import { MAX_OBJECT_COUNT } from './sceneLimits'
+import {
+  DEFAULT_CAMERA,
+  DEFAULT_DPR_CAP,
+  DEFAULT_OBJECT_FORM,
+  DEFAULT_OBJECT_MATERIAL,
+  DEFAULT_OBJECT_MOTION,
+  DEFAULT_OBJECT_REACTION,
+} from './sceneDefaults'
 import { normalizeObjectConfig, normalizeSceneConfig } from './sceneNormalize'
 import type { SceneConfig, SceneObjectConfig } from './sceneConfig'
 import { SCENE_VERSION } from './sceneConfig'
@@ -114,6 +122,40 @@ describe('scene normalization', () => {
       near: 50,
       far: 50.5,
     })
+  })
+
+  it('uses the canonical defaults when values are not finite', () => {
+    const base = createBlankScene()
+    const normalized = normalizeSceneConfig({
+      ...base,
+      canvas: { dprCap: Number.NaN },
+      camera: {
+        ...base.camera,
+        distance: Number.NaN,
+        elevation: Number.NaN,
+        fov: Number.NaN,
+      },
+    })
+
+    expect(normalized.canvas.dprCap).toBe(DEFAULT_DPR_CAP)
+    expect(normalized.camera.distance).toBe(DEFAULT_CAMERA.distance)
+    expect(normalized.camera.elevation).toBe(DEFAULT_CAMERA.elevation)
+    expect(normalized.camera.fov).toBe(DEFAULT_CAMERA.fov)
+
+    const object = normalizeObjectConfig({
+      ...createObjectConfig(1),
+      form: { ...DEFAULT_OBJECT_FORM, detail: Number.NaN },
+      material: { ...DEFAULT_OBJECT_MATERIAL, gloss: Number.NaN },
+      motion: { ...DEFAULT_OBJECT_MOTION, spin: Number.NaN, float: Number.NaN },
+      reaction: { ...DEFAULT_OBJECT_REACTION, breathe: Number.NaN, strike: Number.NaN },
+    })
+
+    expect(object.form.detail).toBe(DEFAULT_OBJECT_FORM.detail)
+    expect(object.material.gloss).toBe(DEFAULT_OBJECT_MATERIAL.gloss)
+    expect(object.motion.spin).toBe(DEFAULT_OBJECT_MOTION.spin)
+    expect(object.motion.float).toBe(DEFAULT_OBJECT_MOTION.float)
+    expect(object.reaction.breathe).toBe(DEFAULT_OBJECT_REACTION.breathe)
+    expect(object.reaction.strike).toBe(DEFAULT_OBJECT_REACTION.strike)
   })
 
   it('clamps camera, finish, and canvas values', () => {

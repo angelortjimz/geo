@@ -28,10 +28,18 @@ import {
   DEFAULT_BLOOM,
   DEFAULT_CAMERA,
   DEFAULT_CHECKER_FLOOR,
+  DEFAULT_DPR_CAP,
+  DEFAULT_EMISSIVE_COLOR,
+  DEFAULT_EMISSIVE_EMISSION,
   DEFAULT_FINISH,
   DEFAULT_GRADIENT_BACKDROP,
   DEFAULT_LIGHTING,
   DEFAULT_LINEAR_FOG,
+  DEFAULT_MATERIAL_COLOR,
+  DEFAULT_OBJECT_FORM,
+  DEFAULT_OBJECT_MATERIAL,
+  DEFAULT_OBJECT_MOTION,
+  DEFAULT_OBJECT_REACTION,
   DEFAULT_REFLECTIVE_FLOOR,
   DEFAULT_SOLID_COLOR,
 } from './sceneDefaults'
@@ -87,9 +95,6 @@ const MAX_ID_LENGTH = 60
 const MAX_NAME_LENGTH = 40
 const DEFAULT_OBJECT_SEQUENCE_LIMIT = 9_999
 
-const DEFAULT_MATERIAL_COLOR = '#e4edf2'
-const DEFAULT_EMISSIVE_COLOR = '#b7f5ff'
-
 function isPrimitiveKind(value: unknown): value is PrimitiveKind {
   return value === 'torus' || value === 'box' || value === 'icosahedron'
 }
@@ -100,8 +105,8 @@ function isMaterialKind(value: unknown): value is MaterialKind {
 
 export function normalizeForm(form: FormConfig): FormConfig {
   return {
-    primitive: isPrimitiveKind(form.primitive) ? form.primitive : 'torus',
-    detail: clampInteger(form.detail, DETAIL_RANGE, 2),
+    primitive: isPrimitiveKind(form.primitive) ? form.primitive : DEFAULT_OBJECT_FORM.primitive,
+    detail: clampInteger(form.detail, DETAIL_RANGE, DEFAULT_OBJECT_FORM.detail),
     flatShading: Boolean(form.flatShading),
   }
 }
@@ -115,35 +120,41 @@ export function normalizeTransform(transform: TransformConfig): TransformConfig 
 }
 
 export function normalizeMaterial(material: MaterialConfig): MaterialConfig {
-  const kind = isMaterialKind(material.kind) ? material.kind : 'chrome'
+  const kind = isMaterialKind(material.kind) ? material.kind : DEFAULT_OBJECT_MATERIAL.kind
   const fallbackColor = kind === 'emissive' ? DEFAULT_EMISSIVE_COLOR : DEFAULT_MATERIAL_COLOR
+  const fallbackEmission =
+    kind === 'emissive' ? DEFAULT_EMISSIVE_EMISSION : DEFAULT_OBJECT_MATERIAL.emission
 
   return {
     kind,
     color: sanitizeColor(material.color, fallbackColor),
-    gloss: clampNumber(material.gloss, GLOSS_RANGE, 0.7),
-    emission: clampNumber(material.emission, EMISSION_RANGE, kind === 'emissive' ? 0.5 : 0),
+    gloss: clampNumber(material.gloss, GLOSS_RANGE, DEFAULT_OBJECT_MATERIAL.gloss),
+    emission: clampNumber(material.emission, EMISSION_RANGE, fallbackEmission),
   }
 }
 
 export function normalizeMotion(motion: MotionConfig): MotionConfig {
   return {
-    spin: clampNumber(motion.spin, SPIN_RANGE, 0.12),
-    float: clampNumber(motion.float, FLOAT_RANGE, 0.06),
-    floatSpeed: clampNumber(motion.floatSpeed, FLOAT_SPEED_RANGE, 0.6),
-    orbitRadius: clampNumber(motion.orbitRadius, ORBIT_RADIUS_RANGE, 0),
-    orbitSpeed: clampNumber(motion.orbitSpeed, ORBIT_SPEED_RANGE, 0.2),
-    phase: clampNumber(motion.phase, PHASE_RANGE, 0),
+    spin: clampNumber(motion.spin, SPIN_RANGE, DEFAULT_OBJECT_MOTION.spin),
+    float: clampNumber(motion.float, FLOAT_RANGE, DEFAULT_OBJECT_MOTION.float),
+    floatSpeed: clampNumber(motion.floatSpeed, FLOAT_SPEED_RANGE, DEFAULT_OBJECT_MOTION.floatSpeed),
+    orbitRadius: clampNumber(
+      motion.orbitRadius,
+      ORBIT_RADIUS_RANGE,
+      DEFAULT_OBJECT_MOTION.orbitRadius,
+    ),
+    orbitSpeed: clampNumber(motion.orbitSpeed, ORBIT_SPEED_RANGE, DEFAULT_OBJECT_MOTION.orbitSpeed),
+    phase: clampNumber(motion.phase, PHASE_RANGE, DEFAULT_OBJECT_MOTION.phase),
   }
 }
 
 export function normalizeReaction(reaction: ReactionConfig): ReactionConfig {
   return {
-    breathe: clampNumber(reaction.breathe, BREATHE_RANGE, 0.06),
-    strike: clampNumber(reaction.strike, STRIKE_RANGE, 0.14),
-    flare: clampNumber(reaction.flare, FLARE_RANGE, 0.35),
-    drift: clampNumber(reaction.drift, DRIFT_RANGE, 0),
-    expand: clampNumber(reaction.expand, EXPAND_RANGE, 0),
+    breathe: clampNumber(reaction.breathe, BREATHE_RANGE, DEFAULT_OBJECT_REACTION.breathe),
+    strike: clampNumber(reaction.strike, STRIKE_RANGE, DEFAULT_OBJECT_REACTION.strike),
+    flare: clampNumber(reaction.flare, FLARE_RANGE, DEFAULT_OBJECT_REACTION.flare),
+    drift: clampNumber(reaction.drift, DRIFT_RANGE, DEFAULT_OBJECT_REACTION.drift),
+    expand: clampNumber(reaction.expand, EXPAND_RANGE, DEFAULT_OBJECT_REACTION.expand),
   }
 }
 
@@ -245,7 +256,7 @@ export function normalizeCheckerFloor(floor: CheckerFloorConfig): CheckerFloorCo
     type: 'checker',
     lightColor: sanitizeColor(floor.lightColor, DEFAULT_CHECKER_FLOOR.lightColor),
     darkColor: sanitizeColor(floor.darkColor, DEFAULT_CHECKER_FLOOR.darkColor),
-    size: clampNumber(floor.size, FLOOR_SIZE_RANGE, DEFAULT_REFLECTIVE_FLOOR.size),
+    size: clampNumber(floor.size, FLOOR_SIZE_RANGE, DEFAULT_CHECKER_FLOOR.size),
     fadeStart: fade.start,
     fadeEnd: fade.end,
   }
@@ -347,7 +358,7 @@ export function normalizeSceneConfig(scene: SceneConfig): SceneConfig {
       0,
     ),
     canvas: {
-      dprCap: clampNumber(scene.canvas.dprCap, DPR_CAP_RANGE, 2),
+      dprCap: clampNumber(scene.canvas.dprCap, DPR_CAP_RANGE, DEFAULT_DPR_CAP),
     },
     objects: normalizeObjectList(scene.objects),
     world: normalizeWorld(scene.world),

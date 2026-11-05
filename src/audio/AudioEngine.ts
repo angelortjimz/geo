@@ -382,10 +382,6 @@ export class AudioEngine {
     return this.analysisRevision
   }
 
-  isPlaying(): boolean {
-    return this.snapshot.status === 'playing'
-  }
-
   async dispose(): Promise<void> {
     this.loadGeneration += 1
     this.analysisRevision += 1

@@ -39,8 +39,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced the scaffold canvas placeholder and capability footer with the fixed study, local-audio transport, capture control, status feedback, and compact signal explanation.
 - Updated the README to describe implemented behavior, verified capture output, architecture, privacy, and current limitations.
 - Centralized scene defaults in `sceneDefaults.ts` so normalization, the blank and starter scenes, and the World inspector share one source of truth.
+- Extended the defaults contract to new-object styling, camera fallbacks, DPR cap, and checker-floor normalization, with tests that keep canonical values inside their editable ranges.
 - Inspector sliders now consume shared `NumericRange` limits, with common display formatters and a single floor-distance field group.
+- Moved editor workflow transitions into a pure `sceneEditorState` reducer with direct tests for replacement, selection, dirty state, limits, and consecutive actions.
+- Extracted pure capture support helpers into `captureSupport.ts`, leaving `CaptureSpike` responsible only for browser capture orchestration.
+- Shared renderer transient resets and floor setup, and narrowed floor synchronization to the inputs it actually reads.
+- Moved canvas prop-to-ref synchronization into an effect, extracted the transport status copy into a named helper, and moved the camera azimuth slider range beside the other shared ranges.
 
 ### Fixed
 
 - Capture now resets procedural motion and analysis envelopes before recording instead of inheriting the editor preview's clock, orbit, spring, and stereo state.
+- Corrected remaining default drift in camera clamping, DPR-cap normalization, and checker-floor fallback size.
+- Removed the unused `AudioEngine.isPlaying()` method and the redundant generated-name overwrite when adding an object.

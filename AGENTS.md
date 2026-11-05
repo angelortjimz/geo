@@ -98,6 +98,37 @@ export interface AudioFeatures {
 }
 ```
 
+## Quality Invariants
+
+### One source of truth
+
+- `src/scene/sceneDefaults.ts` owns tuned defaults shared by normalization, scene factories, and the inspector. `src/scene/sceneLimits.ts` owns editable ranges. Do not restate those values in another module.
+- Normalization fallbacks, blank and starter factories, and inspector constructors must reference the canonical constant rather than copying a literal.
+- If two defaults are intentionally different, name and document both. Do not let an accidental stale copy look like intent.
+- Before finishing a change that adds or edits a default or range, search `src/` for the old literal and update every consumer. Add a test that fails if canonical and fallback values diverge.
+
+### Transitions and derived state
+
+- Keep scene document changes in pure `sceneOperations`; keep selection, dirty state, welcome/editing, and replacement flow in a pure editor reducer under `src/editor/`. The React hook is only an adapter.
+- Never mutate from `scene`, `selectedObjectId`, or other render-captured state when actions may be dispatched consecutively. Use reducer dispatch or functional updates so every transition receives the previous state.
+- Mark dirty in one place. Selection and replacement-dialog state do not dirty the document.
+- Derive values such as `selectedObject`; do not store derived copies in state.
+- Test reducers directly for no-op, boundary, ordering, and consecutive-action behavior without React or browser APIs.
+
+### Reset and synchronization
+
+- A reset is a contract. Put every per-runtime neutral value in one helper used by preview reset, capture reset, and analysis-revision reset.
+- Synchronization functions accept only the data they read. Do not pass a whole config object to a function that needs one field.
+- Validate a GPU or browser resource before attaching it to the scene; failure cleanup must not leave orphans.
+- Extract repeated setup when it encodes a shared invariant. Do not abstract a one-line local helper solely because it appears twice.
+
+### Module boundaries and refactor threshold
+
+- Orchestration modules own browser resources, async ordering, and lifecycle. Pure parsing, naming, header checks, and other browser-independent helpers belong in a co-located module with focused tests.
+- Split a module when it has more than one reason to change, not merely because it is long.
+- Two copies of a generic one-liner such as `clamp` are acceptable. Two copies of a domain default, range, state transition, or lifecycle reset are defects.
+- Domain duplication should be consolidated immediately. Generic utilities may stay local until a third use.
+
 ## TypeScript and Code Style
 
 - Preserve the strict configuration, including `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, `verbatimModuleSyntax`, and `allowImportingTsExtensions`.
@@ -149,6 +180,8 @@ Prefer domain-specific names (`audioFeatures`, `sceneSeed`, `transientEnvelope`)
 - Always provide cleanup when acquiring resources or registering subscriptions.
 - Never create Three.js objects, audio graphs, or animation loops as an incidental consequence of ordinary rendering.
 - Extract custom hooks only for a meaningful shared abstraction. Memoize only when there is a clear identity or measurement benefit; avoid unnecessary `useMemo` and `useCallback`.
+- Do not assign refs during render. Synchronize latest props and callbacks into refs in effects or event handlers, and keep render side-effect free.
+- Extract nested status and accessible-copy ternaries into a named helper or small component. Do not bury multi-branch status copy in JSX.
 - Ensure components behave correctly under React Strict Mode, with no duplicate loops, audio graphs, renderers, or playback.
 
 ## Animation, State, and Lifecycle
@@ -239,6 +272,8 @@ Make disposal safe to call more than once where practical. Test cleanup in devel
 
 - Use Vitest and place focused tests next to the module under test.
 - Add tests when changing pure audio features, envelopes, springs, scene validation, deterministic generation, sizing, or export helpers.
+- Every fixed defect and every state or invariant refactor gets a regression test at the lowest testable layer. If it can only be checked in a browser, record the exact manual check in the task report and `docs/code-quality-audit.md`.
+- Test reducers and pure orchestration helpers without React, WebGL, or real timers.
 - Test observable behavior, not internal call sequences. Keep tests deterministic; prefer controllable clocks or mocked browser APIs over arbitrary timeouts.
 - Cover relevant edge cases: empty inputs, zero and silent audio, mono audio, invalid or out-of-range values, very large values, negative or large deltas, deterministic seeds, stable identities, and invalid scene configurations.
 
@@ -253,6 +288,7 @@ When export work is authorized, verify a valid MP4 container, original stereo au
 - Preserve `docs/roadmap.md`. Do not silently expand milestone scope. Update checkboxes only after behavior is implemented and verified.
 - Update `CHANGELOG.md` for every notable user-visible, behavioral, performance, or architectural change. Add entries under `## [Unreleased]` using Keep a Changelog categories. Do not rewrite released entries; move `Unreleased` entries under a dated version heading when releasing.
 - Keep `README.md` accurate about implemented functionality. Do not present roadmap items as working features. Keep setup, limitations, privacy, and accessibility statements current.
+- Keep `docs/code-quality-audit.md` current. Add findings with file references and impact; mark items fixed only after automated checks and required manual checks pass. Do not leave resolved items in the backlog.
 - Update this file when architecture, scope, commands, code conventions, validation requirements, or dependency policies change.
 - Keep commits focused. Inspect the working tree before destructive changes; do not overwrite or revert changes you did not introduce. Do not commit, push, or publish unless explicitly requested.
 - Do not commit build artifacts, temporary files, secrets, credentials, private audio, or user data.
@@ -263,17 +299,19 @@ When export work is authorized, verify a valid MP4 container, original stereo au
 
 For each task:
 
-1. **Understand** — Read the relevant source, `docs/roadmap.md`, and existing conventions. Identify the current milestone and whether the behavior already exists.
+1. **Understand** — Read the relevant source, `docs/roadmap.md`, `docs/code-quality-audit.md`, and existing conventions. Identify the current milestone and whether the behavior already exists.
 2. **Plan** — Choose the smallest set of files, define layer ownership, and identify lifecycle and testing implications.
 3. **Implement** — Make focused changes, preserve working behavior, keep types explicit, and handle errors and cleanup.
-4. **Validate** — Run the relevant `pnpm` scripts, plus the required manual browser checks for audio, rendering, and capture.
-5. **Document** — Update the changelog, README, roadmap, and this file only when their content actually changed.
+4. **Validate** — Run the relevant `pnpm` scripts, plus the required manual browser checks for audio, rendering, and capture. Refactors require regression tests and confirmation that behavior is unchanged.
+5. **Document** — Update the changelog, README, roadmap, audit, and this file only when their content actually changed.
 6. **Report** — Summarize what changed, key decisions, affected areas, validation performed, manual checks, and limitations. Distinguish checks that passed from checks that were not performed.
 
 A change is complete only when:
 
 - The requested behavior is implemented, respects the current milestone, and meets the project's aesthetic standards.
 - TypeScript, lint, tests, and the production build pass as applicable, and required manual verification and cleanup checks are complete.
+- No new duplicate default, editable range, editor transition, or reset path was introduced.
+- Fixed defects have regression coverage or a recorded manual check.
 - Documentation is updated where necessary.
 
 Compilation alone is never sufficient evidence of completion.

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useReducer } from 'react'
 import type {
   BackdropConfig,
   CameraConfig,
@@ -10,21 +10,13 @@ import type {
 } from '../scene/sceneConfig'
 import type { FinishPatch, ObjectPatch } from '../scene/sceneOperations'
 import {
-  addObject as addSceneObject,
-  duplicateObject as duplicateSceneObject,
-  patchCamera as applyCameraPatch,
-  patchFinish as applyFinishPatch,
-  patchLighting as applyLightingPatch,
-  patchObject as applyObjectPatch,
-  removeObject as removeSceneObject,
-  setBackdrop as applyBackdrop,
-  setFloor as applyFloor,
-  setFog as applyFog,
-} from '../scene/sceneOperations'
-import { createBlankScene, createStarterScene } from '../scene/starterScene'
+  createInitialSceneEditorState,
+  sceneEditorReducer,
+  type EditorMode,
+  type ReplacementKind,
+} from './sceneEditorState'
 
-export type EditorMode = 'welcome' | 'editing'
-export type ReplacementKind = 'blank' | 'starter'
+export type { EditorMode, ReplacementKind } from './sceneEditorState'
 
 export interface SceneEditorActions {
   selectObject: (id: string | null) => void
@@ -59,146 +51,65 @@ export interface SceneEditor {
  * No persistence: the document exists only for as long as this hook is mounted.
  */
 export function useSceneEditor(): SceneEditor {
-  const [scene, setScene] = useState<SceneConfig>(createBlankScene)
-  const [mode, setMode] = useState<EditorMode>('welcome')
-  const [selectedObjectId, setSelectedObjectId] = useState<string | null>(null)
-  const [isDirty, setIsDirty] = useState(false)
-  const [pendingReplacement, setPendingReplacement] = useState<ReplacementKind | null>(null)
-
-  const selectedObject = scene.objects.find((object) => object.id === selectedObjectId) ?? null
-
-  const replaceScene = (kind: ReplacementKind) => {
-    const next = kind === 'blank' ? createBlankScene() : createStarterScene()
-    setScene(next)
-    setSelectedObjectId(next.objects[0]?.id ?? null)
-    setMode('editing')
-    setIsDirty(false)
-    setPendingReplacement(null)
-  }
-
-  const requestReplacement = (kind: ReplacementKind) => {
-    if (mode === 'editing' && isDirty) {
-      setPendingReplacement(kind)
-      return
-    }
-
-    replaceScene(kind)
-  }
+  const [state, dispatch] = useReducer(sceneEditorReducer, undefined, createInitialSceneEditorState)
+  const selectedObject =
+    state.scene.objects.find((object) => object.id === state.selectedObjectId) ?? null
 
   const actions: SceneEditorActions = {
     selectObject: (id) => {
-      setSelectedObjectId(id)
+      dispatch({ type: 'selectObject', id })
     },
-
     addObject: () => {
-      const next = addSceneObject(scene)
-      if (next === scene) {
-        return
-      }
-
-      setScene(next)
-      setSelectedObjectId(next.objects[next.objects.length - 1]?.id ?? null)
-      setIsDirty(true)
+      dispatch({ type: 'addObject' })
     },
-
     duplicateSelected: () => {
-      if (!selectedObjectId) {
-        return
-      }
-
-      const next = duplicateSceneObject(scene, selectedObjectId)
-      if (next === scene) {
-        return
-      }
-
-      setScene(next)
-      setSelectedObjectId(next.objects[next.objects.length - 1]?.id ?? null)
-      setIsDirty(true)
+      dispatch({ type: 'duplicateSelected' })
     },
-
     removeSelected: () => {
-      if (!selectedObjectId) {
-        return
-      }
-
-      const index = scene.objects.findIndex((object) => object.id === selectedObjectId)
-      const next = removeSceneObject(scene, selectedObjectId)
-      if (next === scene) {
-        return
-      }
-
-      const remaining = next.objects
-      const nextIndex = index < 0 ? remaining.length - 1 : Math.min(index, remaining.length - 1)
-      setScene(next)
-      setSelectedObjectId(remaining[nextIndex]?.id ?? null)
-      setIsDirty(true)
+      dispatch({ type: 'removeSelected' })
     },
-
     patchSelected: (patch) => {
-      if (!selectedObjectId) {
-        return
-      }
-
-      setScene((current) => applyObjectPatch(current, selectedObjectId, patch))
-      setIsDirty(true)
+      dispatch({ type: 'patchSelected', patch })
     },
-
     setBackdrop: (backdrop) => {
-      setScene((current) => applyBackdrop(current, backdrop))
-      setIsDirty(true)
+      dispatch({ type: 'setBackdrop', backdrop })
     },
-
     setFloor: (floor) => {
-      setScene((current) => applyFloor(current, floor))
-      setIsDirty(true)
+      dispatch({ type: 'setFloor', floor })
     },
-
     setFog: (fog) => {
-      setScene((current) => applyFog(current, fog))
-      setIsDirty(true)
+      dispatch({ type: 'setFog', fog })
     },
-
     patchLighting: (patch) => {
-      setScene((current) => applyLightingPatch(current, patch))
-      setIsDirty(true)
+      dispatch({ type: 'patchLighting', patch })
     },
-
     patchCamera: (patch) => {
-      setScene((current) => applyCameraPatch(current, patch))
-      setIsDirty(true)
+      dispatch({ type: 'patchCamera', patch })
     },
-
     patchFinish: (patch) => {
-      setScene((current) => applyFinishPatch(current, patch))
-      setIsDirty(true)
+      dispatch({ type: 'patchFinish', patch })
     },
-
     requestBlank: () => {
-      requestReplacement('blank')
+      dispatch({ type: 'requestReplacement', kind: 'blank' })
     },
-
     requestStarter: () => {
-      requestReplacement('starter')
+      dispatch({ type: 'requestReplacement', kind: 'starter' })
     },
-
     confirmReplacement: () => {
-      if (pendingReplacement) {
-        replaceScene(pendingReplacement)
-      }
+      dispatch({ type: 'confirmReplacement' })
     },
-
     cancelReplacement: () => {
-      setPendingReplacement(null)
+      dispatch({ type: 'cancelReplacement' })
     },
   }
 
   return {
-    scene,
-    mode,
-    selectedObjectId,
+    scene: state.scene,
+    mode: state.mode,
+    selectedObjectId: state.selectedObjectId,
     selectedObject,
-    isDirty,
-    pendingReplacement,
+    isDirty: state.isDirty,
+    pendingReplacement: state.pendingReplacement,
     actions,
   }
 }

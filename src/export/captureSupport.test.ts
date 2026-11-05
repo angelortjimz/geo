@@ -4,7 +4,7 @@ import {
   getSupportedMp4MimeTypes,
   hasMp4FileHeader,
   MP4_MIME_CANDIDATES,
-} from './captureSpike'
+} from './captureSupport'
 
 function mp4Header(): ArrayBuffer {
   const buffer = new ArrayBuffer(12)
@@ -17,7 +17,7 @@ function mp4Header(): ArrayBuffer {
   return buffer
 }
 
-describe('capture spike helpers', () => {
+describe('capture support helpers', () => {
   it('accepts an MP4 ftyp header and rejects other containers', () => {
     expect(hasMp4FileHeader(mp4Header())).toBe(true)
     expect(hasMp4FileHeader(new ArrayBuffer(4))).toBe(false)

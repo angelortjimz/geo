@@ -36,9 +36,11 @@ export const SceneCanvas = forwardRef<SceneCaptureHandle, SceneCanvasProps>(func
   const [error, setError] = useState<string | null>(null)
   const [isOrbiting, setIsOrbiting] = useState(false)
 
-  sceneRef.current = scene
-  onCameraChangeRef.current = onCameraChange
-  cameraLockedRef.current = cameraLocked
+  useEffect(() => {
+    sceneRef.current = scene
+    onCameraChangeRef.current = onCameraChange
+    cameraLockedRef.current = cameraLocked
+  }, [scene, onCameraChange, cameraLocked])
 
   useImperativeHandle(
     ref,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { applyCameraDrag, applyCameraZoom, getCameraPosition } from './camera'
 import type { CameraConfig } from './sceneConfig'
+import { DEFAULT_CAMERA } from './sceneDefaults'
 
 const CAMERA: CameraConfig = {
   target: [0, 1, 0],
@@ -28,7 +29,7 @@ describe('spherical camera', () => {
     expect(getCameraPosition({ ...CAMERA, distance: 0 })[2]).toBeCloseTo(2, 5)
   })
 
-  it('keeps invalid input finite', () => {
+  it('keeps invalid input finite and falls back to canonical defaults', () => {
     const position = getCameraPosition({
       ...CAMERA,
       distance: Number.NaN,
@@ -39,6 +40,13 @@ describe('spherical camera', () => {
     for (const value of position) {
       expect(Number.isFinite(value)).toBe(true)
     }
+
+    const elevationRadians = (DEFAULT_CAMERA.elevation * Math.PI) / 180
+    expect(position[1]).toBeCloseTo(
+      CAMERA.target[1] + Math.sin(elevationRadians) * DEFAULT_CAMERA.distance,
+      5,
+    )
+    expect(position[2]).toBeCloseTo(Math.cos(elevationRadians) * DEFAULT_CAMERA.distance, 5)
   })
 
   it('converts pointer drag into clamped camera patches', () => {
